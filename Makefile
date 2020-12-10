@@ -12,7 +12,8 @@ deps: linenoise
 linenoise:
 	cd deps/$@ && $(MAKE)
 
-.PHONY: distclean
-distclean:
+.PHONY: clean
+clean:
 	-(cd deps/linenoise && $(MAKE) clean) > /dev/null || true
 	-(rm -f .make-*)
+	-($(RM) map)
