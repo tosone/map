@@ -3,34 +3,17 @@
 #include <string.h>
 
 #include <linenoise.h>
+#include <lru.h>
 
 void completion(const char *buf, linenoiseCompletions *lc) {
   if (buf[0] == 'l') {
     linenoiseAddCompletion(lc, "lru");
-    linenoiseAddCompletion(lc, "lru len");
-    linenoiseAddCompletion(lc, "lru get");
-    linenoiseAddCompletion(lc, "lru set");
   }
 }
 
 int main(int argc, char **argv) {
   char *line;
   char *prgname = argv[0];
-
-  while (argc > 1) {
-    argc--;
-    argv++;
-    if (!strcmp(*argv, "--multiline")) {
-      linenoiseSetMultiLine(1);
-      printf("Multi-line mode enabled.\n");
-    } else if (!strcmp(*argv, "--keycodes")) {
-      linenoisePrintKeyCodes();
-      exit(0);
-    } else {
-      fprintf(stderr, "Usage: %s [--multiline] [--keycodes]\n", prgname);
-      exit(1);
-    }
-  }
 
   linenoiseSetCompletionCallback(completion);
 
