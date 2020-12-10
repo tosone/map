@@ -1,6 +1,6 @@
 CFLAGS = -Os -Wall
 
-linenoise.o: linenoise.h linenoise.c
+murmurhash.o: murmurhash.h murmurhash.c
 
 clean:
 	$(RM) -f *.o
