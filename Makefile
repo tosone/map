@@ -4,7 +4,7 @@ LDFLAGS += ./deps/linenoise/linenoise.o ./deps/murmurhash/murmurhash.o
 .PHONY: all
 all: deps map
 
-map: map.c lru.c hashmap.c
+map: map.c lru.c hashmap.c command.c
 
 .PHONY: deps
 deps: linenoise murmurhash
