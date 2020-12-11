@@ -5,6 +5,13 @@
 #define HMAP_COMMAND_SET "set"
 #define HMAP_COMMAND_DEL "del"
 
+const HMAP_MAX_LINK_LIST_DEPTH = 8;   // 分支链表的最大深度
+const HMAP_INITIALIZE_SIZE = 8;       // 初始化空间
+const HMAP_GROW_FACTOR = 2;           // 增长因子
+const HMAP_GROW_FACTOR_USABLE = 1024; // 增长因子最大的有效范围
+const HMAP_GROW_MAX = 1024;           // 增长的最大数值
+const HMAP_THRESHOLD = 0.75f;         // 负载因子
+
 typedef struct entry_t {
   char *key;
   void *value;
