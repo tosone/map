@@ -20,12 +20,37 @@
 void completion(const char *buf, linenoiseCompletions *lc) {
   if (buf[0] == 'l') {
     linenoiseAddCompletion(lc, "lru");
+  } else if (buf[0] == 'h') {
+    linenoiseAddCompletion(lc, "hmap");
   }
+}
+
+char *hints(const char *buf, int *color, int *bold) {
+  *color = 32;
+  *bold = 0;
+  if (strcmp(buf, "lru") == 0) {
+    return " <command>";
+  } else if (strcmp(buf, "lru len") == 0) {
+    return " <length>";
+  } else if (strcmp(buf, "lru get") == 0) {
+    return " <key>";
+  } else if (strcmp(buf, "lru set") == 0) {
+    return " <key> <value>";
+  } else if (strcmp(buf, "hmap") == 0) {
+    return " <command>";
+  } else if (strcmp(buf, "hmap get") == 0) {
+    return " <key>";
+  } else if (strcmp(buf, "hmap set") == 0) {
+    return " <key>";
+  }
+  return NULL;
 }
 
 int main(int argc, char **argv) {
   linenoiseSetCompletionCallback(completion);
+  linenoiseSetHintsCallback(hints);
   linenoiseHistoryLoad("history.txt");
+  linenoiseHistorySetMaxLen(1000);
 
   char *line;
   while ((line = linenoise("map> ")) != NULL) {
@@ -58,15 +83,6 @@ int main(int argc, char **argv) {
         printf("%s\n", ERR_COMMAND);
       }
       Commands_free(commands, commands_length);
-    } else if (!strncmp(line, "/historylen", 11)) {
-      int len = atoi(line + 11);
-      linenoiseHistorySetMaxLen(len);
-    } else if (!strncmp(line, "/mask", 5)) {
-      linenoiseMaskModeEnable();
-    } else if (!strncmp(line, "/unmask", 7)) {
-      linenoiseMaskModeDisable();
-    } else if (line[0] == '/') {
-      printf("Unreconized command: %s\n", line);
     }
     free(line);
   }
