@@ -1,5 +1,5 @@
-CFLAGS  += -I./deps/linenoise -I.
-LDFLAGS += ./deps/linenoise/linenoise.o
+CFLAGS  += -Os -Wall -I./deps/linenoise -I./deps/murmurhash -I.
+LDFLAGS += ./deps/linenoise/linenoise.o ./deps/murmurhash/murmurhash.o
 
 .PHONY: all
 all: deps map

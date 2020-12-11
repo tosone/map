@@ -1,6 +1,13 @@
+#pragma once
+
+#define LRU_COMMAND "lru"
+#define LRU_COMMAND_LEN "len"
+#define LRU_COMMAND_GET "get"
+#define LRU_COMMAND_PUT "put"
+
 typedef struct LRUEntry {
-  void *data;
-  char *key;
+  void *data; // val
+  char *key;  // key
 } LRUEntry;
 
 typedef struct LRU {
@@ -9,3 +16,9 @@ typedef struct LRU {
   LRUEntry data;
   LRUEntry *next;
 } LRU;
+
+LRU *LRU_init(int cap);
+
+void LRU_put(char *key, char *val);
+
+void LRU_get(char *key);
