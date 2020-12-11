@@ -19,5 +19,4 @@ murmurhash:
 clean:
 	-(cd deps/linenoise && $(MAKE) clean) > /dev/null || true
 	-(cd deps/murmurhash && $(MAKE) clean) > /dev/null || true
-	-(rm -f .make-*)
 	-($(RM) map)
