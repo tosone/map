@@ -29,10 +29,8 @@ char *hints(const char *buf, int *color, int *bold);
 hashmap_t *hmap;
 
 void clear() {
-  // free hashmap
   hashmap_free(hmap);
-  printf("clear all\n");
-  printf("bye\n");
+  printf("clear all, bye\n");
 }
 
 int main(int argc, char **argv) {
@@ -41,7 +39,7 @@ int main(int argc, char **argv) {
   linenoiseHistoryLoad("history.txt");
   linenoiseHistorySetMaxLen(1000);
 
-  hmap = hashmap_create(10);
+  hmap = hashmap_create(HMAP_INITIALIZE_SIZE);
   atexit(clear);
 
   char *line;

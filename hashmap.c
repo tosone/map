@@ -29,11 +29,29 @@ entry_t *hashmap_pair(const char *key, const void *value, const int value_length
   return entry;
 }
 
-void hashmap_set(hashmap_t *hashtable, const char *key, const void *value, const int value_length) {
+void hashmap_rehash(hashmap_t *hashmap) {
+  int new_cap = hashmap->cap + HMAP_GROW_MAX;
+  if (hashmap->cap >= HMAP_GROW_FACTOR_USABLE) {
+    new_cap = hashmap->cap * HMAP_GROW_FACTOR;
+  }
+  hashmap_t *new_hmap = hashmap_create(new_cap);
+
+  // hashmap_free(hmap);
+  // hmap = new_hmap;
+}
+
+void hashmap_set(hashmap_t *hashmap, const char *key, const void *value, const int value_length) {
   uint32_t slot = murmurhash(key, strlen(key), 0);
-  entry_t *entry = hashtable->entries[slot % hashtable->cap];
+  entry_t *entry = hashmap->entries[slot % hashmap->cap];
+
+  if (hashmap->len / hashmap->cap > HMAP_THRESHOLD) {
+    
+  }
+
+  hashmap->len++;
+
   if (entry == NULL) {
-    hashtable->entries[slot % hashtable->cap] = hashmap_pair(key, value, value_length);
+    hashmap->entries[slot % hashmap->cap] = hashmap_pair(key, value, value_length);
     return;
   }
 
@@ -54,9 +72,9 @@ void hashmap_set(hashmap_t *hashtable, const char *key, const void *value, const
   prev->next = hashmap_pair(key, value, value_length);
 }
 
-char *hashmap_get(hashmap_t *hashtable, const char *key) {
+char *hashmap_get(hashmap_t *hashmap, const char *key) {
   uint32_t slot = murmurhash(key, strlen(key), 0);
-  entry_t *entry = hashtable->entries[slot % hashtable->cap];
+  entry_t *entry = hashmap->entries[slot % hashmap->cap];
   if (entry == NULL) {
     return NULL;
   }
@@ -69,9 +87,9 @@ char *hashmap_get(hashmap_t *hashtable, const char *key) {
   return NULL;
 }
 
-void hashmap_del(hashmap_t *hashtable, const char *key) {
+void hashmap_del(hashmap_t *hashmap, const char *key) {
   uint32_t slot = murmurhash(key, strlen(key), 0);
-  entry_t *entry = hashtable->entries[slot % hashtable->cap];
+  entry_t *entry = hashmap->entries[slot % hashmap->cap];
   if (entry == NULL) {
     return;
   }
@@ -80,10 +98,10 @@ void hashmap_del(hashmap_t *hashtable, const char *key) {
   while (entry != NULL) {
     if (strcmp(entry->key, key) == 0) {
       if (entry->next == NULL && idx == 0) {
-        hashtable->entries[slot % hashtable->cap] = NULL;
+        hashmap->entries[slot % hashmap->cap] = NULL;
       }
       if (entry->next != NULL && idx == 0) {
-        hashtable->entries[slot % hashtable->cap] = entry->next;
+        hashmap->entries[slot % hashmap->cap] = entry->next;
       }
       if (entry->next == NULL && idx != 0) {
         prev->next = NULL;
@@ -112,10 +130,10 @@ void entry_free(entry_t *entry) {
   free(entry);
 }
 
-void hashmap_free(hashmap_t *hashtable) {
-  for (int i = 0; i < hashtable->cap; i++) {
-    if (hashtable->entries[i] != NULL) {
-      entry_free(hashtable->entries[i]);
+void hashmap_free(hashmap_t *hashmap) {
+  for (int i = 0; i < hashmap->cap; i++) {
+    if (hashmap->entries[i] != NULL) {
+      entry_free(hashmap->entries[i]);
     }
   }
 }
