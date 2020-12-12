@@ -27,9 +27,11 @@ void completion(const char *buf, linenoiseCompletions *lc);
 char *hints(const char *buf, int *color, int *bold);
 
 hashmap_t *hmap;
+LRU *lru;
 
 void clear() {
   hashmap_free(hmap);
+  LRU_free(lru);
   printf("clear all, bye\n");
 }
 
@@ -40,6 +42,7 @@ int main(int argc, char **argv) {
   linenoiseHistorySetMaxLen(1000);
 
   hmap = hashmap_create();
+  lru = LRU_create();
   atexit(clear);
 
   char *line;
@@ -65,11 +68,37 @@ int main(int argc, char **argv) {
         } else if (strncmp(commands[0], VERSION_COMMAND, strlen(VERSION_COMMAND)) == 0) {
           printf("%s\n", VERSION);
         } else if (strncmp(commands[0], LRU_COMMAND, strlen(LRU_COMMAND)) == 0) {
-          command_length_check(<=, 2);
+          command_length_check(<, 2);
           if (strncmp(commands[1], LRU_COMMAND_LEN, strlen(LRU_COMMAND_LEN)) == 0) {
+            command_length_check(!=, 2);
+            printf("%d\n", lru->len);
+          } else if (strncmp(commands[1], LRU_COMMAND_SET, strlen(LRU_COMMAND_SET)) == 0) {
+            command_length_check(!=, 4);
+            char *key = commands[2];
+            void *value = commands[3];
+            LRU_set(lru, key, value, strlen(value) + 1);
+          } else if (strncmp(commands[1], LRU_COMMAND_GET, strlen(LRU_COMMAND_GET)) == 0) {
             command_length_check(!=, 3);
-            int len = atoi(commands[2]);
-            printf("%d\n", len);
+            char *key = commands[2];
+            size_t value_length = 0;
+            char *value = (char *)LRU_get(lru, key, &value_length);
+            if (value == NULL) {
+              printf("key not found\n");
+            } else {
+              printf("%s %lu %lu\n", value, strlen(value), value_length);
+            }
+          } else if (strncmp(commands[1], LRU_COMMAND_CAP, strlen(LRU_COMMAND_CAP)) == 0) {
+            command_length_check(<, 3);
+            if (strncmp(commands[2], LRU_COMMAND_GET, strlen(LRU_COMMAND_GET)) == 0) {
+              printf("%d\n", lru->cap);
+            } else if (strncmp(commands[2], LRU_COMMAND_SET, strlen(LRU_COMMAND_SET)) == 0) {
+              int cap = atoi(commands[3]);
+              if (cap < lru->cap) {
+                printf("please set more bigger cap");
+              } else {
+                lru->cap = cap;
+              }
+            }
           }
         } else if (strncmp(commands[0], HMAP_COMMAND, strlen(HMAP_COMMAND)) == 0) {
           command_length_check(<, 2);
@@ -87,11 +116,12 @@ int main(int argc, char **argv) {
           } else if (strncmp(commands[1], HMAP_COMMAND_GET, strlen(HMAP_COMMAND_GET)) == 0) {
             command_length_check(!=, 3);
             char *key = commands[2];
-            char *val = hashmap_get(hmap, key);
-            if (val == NULL) {
+            size_t value_length = 0;
+            char *value = (char *)hashmap_get(hmap, key, &value_length);
+            if (value == NULL) {
               printf("key not found\n");
             } else {
-              printf("%s\n", val);
+              printf("%s\n", value);
             }
           } else if (strncmp(commands[1], HMAP_COMMAND_DEL, strlen(HMAP_COMMAND_DEL)) == 0) {
             command_length_check(!=, 3);
@@ -130,6 +160,10 @@ char *hints(const char *buf, int *color, int *bold) {
     return " <key>";
   } else if (strcmp(buf, "lru set") == 0) {
     return " <key> <value>";
+  } else if (strcmp(buf, "lru cap") == 0) {
+    return " <command> <value>";
+  } else if (strcmp(buf, "lru cap set") == 0) {
+    return " <value>";
   } else if (strcmp(buf, "hmap") == 0) {
     return " <command>";
   } else if (strcmp(buf, "hmap get") == 0) {
