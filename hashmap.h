@@ -4,6 +4,8 @@
 #define HMAP_COMMAND_GET "get"
 #define HMAP_COMMAND_SET "set"
 #define HMAP_COMMAND_DEL "del"
+#define HMAP_COMMAND_CAP "cap"
+#define HMAP_COMMAND_LEN "len"
 
 typedef struct entry_t {
   char *key;
