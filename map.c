@@ -72,8 +72,14 @@ int main(int argc, char **argv) {
             printf("%d\n", len);
           }
         } else if (strncmp(commands[0], HMAP_COMMAND, strlen(HMAP_COMMAND)) == 0) {
-          command_length_check(<=, 2);
-          if (strncmp(commands[1], HMAP_COMMAND_SET, strlen(HMAP_COMMAND_SET)) == 0) {
+          command_length_check(<, 2);
+          if (strncmp(commands[1], HMAP_COMMAND_CAP, strlen(HMAP_COMMAND_CAP)) == 0) {
+            command_length_check(!=, 2);
+            printf("%d\n", hmap->cap);
+          } else if (strncmp(commands[1], HMAP_COMMAND_LEN, strlen(HMAP_COMMAND_LEN)) == 0) {
+            command_length_check(!=, 2);
+            printf("%d\n", hmap->len);
+          } else if (strncmp(commands[1], HMAP_COMMAND_SET, strlen(HMAP_COMMAND_SET)) == 0) {
             command_length_check(!=, 4);
             char *key = commands[2];
             void *value = commands[3];
