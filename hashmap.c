@@ -7,7 +7,7 @@
 #include <murmurhash.h>
 
 const int HMAP_MAX_LINK_LIST_DEPTH = 8;   // 分支链表的最大深度
-const int HMAP_INITIALIZE_SIZE = 4;       // 初始化空间
+const int HMAP_INITIALIZE_SIZE = 8;       // 初始化空间
 const int HMAP_GROW_FACTOR = 2;           // 增长因子
 const int HMAP_GROW_FACTOR_USABLE = 1024; // 增长因子最大的有效范围
 const int HMAP_GROW_MAX = 1024;           // 增长的最大数值
