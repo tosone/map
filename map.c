@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
   linenoiseHistoryLoad("history.txt");
   linenoiseHistorySetMaxLen(1000);
 
-  hmap = hashmap_create(HMAP_INITIALIZE_SIZE);
+  hmap = hashmap_create();
   atexit(clear);
 
   char *line;
@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
             command_length_check(!=, 4);
             char *key = commands[2];
             void *value = commands[3];
-            hashmap_set(hmap, key, value, strlen(value) + 1);
+            hmap = hashmap_set(hmap, key, value, strlen(value) + 1);
           } else if (strncmp(commands[1], HMAP_COMMAND_GET, strlen(HMAP_COMMAND_GET)) == 0) {
             command_length_check(!=, 3);
             char *key = commands[2];
