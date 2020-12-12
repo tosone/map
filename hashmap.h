@@ -22,7 +22,7 @@ typedef struct {
 
 hashmap_t *hashmap_create();
 entry_t *hashmap_pair(const char *key, const void *value, const int value_length);
-hashmap_t *hashmap_set(hashmap_t *hashtable, const char *key, const void *value, const int value_length);
-char *hashmap_get(hashmap_t *hashtable, const char *key);
-void hashmap_del(hashmap_t *hashtable, const char *key);
-void hashmap_free(hashmap_t *hashtable);
+hashmap_t *hashmap_set(hashmap_t *hashmap, const char *key, const void *value, const int value_length);
+char *hashmap_get(hashmap_t *hashmap, const char *key);
+void hashmap_del(hashmap_t *hashmap, const char *key);
+void hashmap_free(hashmap_t *hashmap);
