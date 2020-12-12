@@ -20,7 +20,6 @@ typedef struct {
   entry_t **entries;
 } hashmap_t;
 
-unsigned int hash(const char *key);
 hashmap_t *hashmap_create();
 entry_t *hashmap_pair(const char *key, const void *value, const int value_length);
 hashmap_t *hashmap_set(hashmap_t *hashtable, const char *key, const void *value, const int value_length);
