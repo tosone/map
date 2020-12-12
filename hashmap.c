@@ -17,15 +17,15 @@ hashmap_t *hashmap_create() {
   hashmap_t *hashmap = (hashmap_t *)malloc(sizeof(hashmap_t));
   hashmap->cap = HMAP_INITIALIZE_SIZE;
   hashmap->len = 0;
-  hashmap->entries = (entry_t **)malloc(sizeof(entry_t *) * hashmap->cap);
+  hashmap->entries = (hashmap_entry_t **)malloc(sizeof(hashmap_entry_t *) * hashmap->cap);
   for (int i = 0; i < hashmap->cap; i++) {
     hashmap->entries[i] = NULL;
   }
   return hashmap;
 }
 
-entry_t *hashmap_pair(const char *key, const void *value, const int value_length) {
-  entry_t *entry = (entry_t *)malloc(sizeof(entry_t));
+hashmap_entry_t *hashmap_pair(const char *key, const void *value, const int value_length) {
+  hashmap_entry_t *entry = (hashmap_entry_t *)malloc(sizeof(hashmap_entry_t));
   entry->key = (char *)malloc(strlen(key) + 1);
   entry->value = (void *)malloc(value_length);
   entry->value_length = value_length;
@@ -37,7 +37,7 @@ entry_t *hashmap_pair(const char *key, const void *value, const int value_length
   return entry;
 }
 
-void hashmap_rehash_helper(hashmap_t *hashmap, entry_t *entry) {
+void hashmap_rehash_helper(hashmap_t *hashmap, hashmap_entry_t *entry) {
   if (entry == NULL) {
     return;
   }
@@ -56,7 +56,7 @@ hashmap_t *hashmap_rehash(hashmap_t *hashmap) {
   hashmap_t *new_hashmap = (hashmap_t *)malloc(sizeof(hashmap_t));
   new_hashmap->cap = new_cap;
   new_hashmap->len = 0;
-  new_hashmap->entries = (entry_t **)malloc(sizeof(entry_t *) * new_cap);
+  new_hashmap->entries = (hashmap_entry_t **)malloc(sizeof(hashmap_entry_t *) * new_cap);
   for (int i = 0; i < new_hashmap->cap; i++) {
     new_hashmap->entries[i] = NULL;
   }
@@ -74,7 +74,7 @@ hashmap_t *hashmap_set(hashmap_t *hashmap, const char *key, const void *value, c
     hashmap = hashmap_rehash(hashmap);
   }
   uint32_t slot = murmurhash(key, strlen(key), 0);
-  entry_t *entry = hashmap->entries[slot % hashmap->cap];
+  hashmap_entry_t *entry = hashmap->entries[slot % hashmap->cap];
 
   hashmap->len++;
 
@@ -83,7 +83,7 @@ hashmap_t *hashmap_set(hashmap_t *hashmap, const char *key, const void *value, c
     return hashmap;
   }
 
-  entry_t *prev;
+  hashmap_entry_t *prev;
 
   while (entry != NULL) {
     if (strcmp(entry->key, key) == 0) {
@@ -102,14 +102,17 @@ hashmap_t *hashmap_set(hashmap_t *hashmap, const char *key, const void *value, c
   return hashmap;
 }
 
-char *hashmap_get(hashmap_t *hashmap, const char *key) {
+void *hashmap_get(hashmap_t *hashmap, const char *key, size_t *value_length) {
   uint32_t slot = murmurhash(key, strlen(key), 0);
-  entry_t *entry = hashmap->entries[slot % hashmap->cap];
+  hashmap_entry_t *entry = hashmap->entries[slot % hashmap->cap];
   if (entry == NULL) {
     return NULL;
   }
   while (entry != NULL) {
     if (strcmp(entry->key, key) == 0) {
+      if (value_length != NULL) {
+        *value_length = entry->value_length;
+      }
       return entry->value;
     }
     entry = entry->next;
@@ -119,11 +122,11 @@ char *hashmap_get(hashmap_t *hashmap, const char *key) {
 
 void hashmap_del(hashmap_t *hashmap, const char *key) {
   uint32_t slot = murmurhash(key, strlen(key), 0);
-  entry_t *entry = hashmap->entries[slot % hashmap->cap];
+  hashmap_entry_t *entry = hashmap->entries[slot % hashmap->cap];
   if (entry == NULL) {
     return;
   }
-  entry_t *prev;
+  hashmap_entry_t *prev;
   int index = 0;
   while (entry != NULL) {
     if (strcmp(entry->key, key) == 0) {
@@ -150,7 +153,7 @@ void hashmap_del(hashmap_t *hashmap, const char *key) {
   }
 }
 
-void entry_free(entry_t *entry) {
+void entry_free(hashmap_entry_t *entry) {
   if (entry->next != NULL) {
     entry_free(entry->next);
   }
@@ -167,4 +170,21 @@ void hashmap_free(hashmap_t *hashmap) {
   }
   free(hashmap->entries);
   free(hashmap);
+}
+
+void hashmap_iterate_helper(hashmap_t *hashmap, void (*f)(hashmap_entry_t *entry), hashmap_entry_t *entry) {
+  if (entry->next != NULL) {
+    hashmap_iterate_helper(hashmap, f, entry);
+  }
+  if (f != NULL) {
+    f(entry);
+  }
+}
+
+void hashmap_iterate(hashmap_t *hashmap, void (*f)(hashmap_entry_t *entry)) {
+  for (int i = 0; i < hashmap->cap; i++) {
+    if (hashmap->entries[i] != NULL) {
+      hashmap_iterate_helper(hashmap, f, hashmap->entries[i]);
+    }
+  }
 }
