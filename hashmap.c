@@ -173,15 +173,22 @@ void hashmap_free(hashmap_t *hashmap) {
   free(hashmap);
 }
 
+void hashmap_print_entry_helper(hashmap_entry_t *entry, bool *first) {
+  if (*first) {
+    *first = false;
+    printf("%s:%s", entry->key, (char *)entry->value);
+  } else {
+    printf(" %s:%s", entry->key, (char *)entry->value);
+  }
+  if (entry->next != NULL) {
+    hashmap_print_entry_helper(entry->next, first);
+  }
+}
+
 void hashmap_print_helper(hashmap_t *hashmap, bool first) {
   for (int i = 0; i < hashmap->cap; i++) {
     if (hashmap->entries[i] != NULL) {
-      if (first) {
-        first = false;
-        printf("%s:%s", hashmap->entries[i]->key, (char *)hashmap->entries[i]->value);
-      } else {
-        printf(" %s:%s", hashmap->entries[i]->key, (char *)hashmap->entries[i]->value);
-      }
+      hashmap_print_entry_helper(hashmap->entries[i], &first);
     }
   }
 }
