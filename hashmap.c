@@ -127,7 +127,7 @@ void hashmap_del(hashmap_t *hashmap, const char *key) {
   if (entry == NULL) {
     return;
   }
-  hashmap_entry_t *prev;
+  hashmap_entry_t *prev = NULL;
   int index = 0;
   while (entry != NULL) {
     if (strcmp(entry->key, key) == 0) {
