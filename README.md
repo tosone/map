@@ -1,7 +1,5 @@
 # map
 
-## HashMap
-
 HashMap 数据结构。包含的命令有：
 
 - `hmap set <key> <value>` 设置一个 key 到 hashmap 中。
@@ -27,6 +25,12 @@ AVL-Tree 数据结构。包含的命令：
 - `avl print <pre/in/post>` 以前序、中序、后序方式遍历 avl tree。
 - `avl dump <filename>` 将 avl tree 中的数据导出至 dot。
 
+## 示例
+
+|HashMap|LRU|AVL-Tree|
+|:---:|:---:|:---:|
+|![hashmap](./image/hashmap.png)|![hashmap](./image/lru.png)|![hashmap](./image/avl.png)|
+
 ## 参考
 
-- 转换 dot 文件到 png `dot -Tpng filename.dot -o filename.png`。
+- 转换 dot 文件到 png: `dot -Tpng filename.dot -o filename.png`。

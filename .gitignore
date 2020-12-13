@@ -53,5 +53,4 @@ dkms.conf
 
 map
 history.txt
-*.png
 *.dot
