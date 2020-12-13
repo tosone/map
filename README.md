@@ -1,5 +1,9 @@
 # map
 
+一个类似于 Redis 客户端的命令格式，包含各种简单的数据结构的实现。
+
+## 命令列表
+
 HashMap 数据结构。包含的命令有：
 
 - `hmap set <key> <value>` 设置一个 key 到 hashmap 中。
