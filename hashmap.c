@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -170,6 +171,24 @@ void hashmap_free(hashmap_t *hashmap) {
   }
   free(hashmap->entries);
   free(hashmap);
+}
+
+void hashmap_print_helper(hashmap_t *hashmap, bool first) {
+  for (int i = 0; i < hashmap->cap; i++) {
+    if (hashmap->entries[i] != NULL) {
+      if (first) {
+        first = false;
+        printf("%s:%s", hashmap->entries[i]->key, (char *)hashmap->entries[i]->value);
+      } else {
+        printf(" %s:%s", hashmap->entries[i]->key, (char *)hashmap->entries[i]->value);
+      }
+    }
+  }
+}
+
+void hashmap_print(hashmap_t *hashmap) {
+  hashmap_print_helper(hashmap, true);
+  printf("\n");
 }
 
 void hashmap_iterate_helper(hashmap_t *hashmap, void (*f)(hashmap_entry_t *entry), hashmap_entry_t *entry) {

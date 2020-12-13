@@ -102,6 +102,9 @@ int main(int argc, char **argv) {
                 lru->cap = cap;
               }
             }
+          } else if (strncmp(commands[1], LRU_COMMAND_PRINT, strlen(LRU_COMMAND_PRINT)) == 0) {
+            command_length_check(!=, 2);
+            LRU_print(lru);
           }
         } else if (strncmp(commands[0], HMAP_COMMAND, strlen(HMAP_COMMAND)) == 0) {
           command_length_check(<, 2);
@@ -130,6 +133,9 @@ int main(int argc, char **argv) {
             command_length_check(!=, 3);
             char *key = commands[2];
             hashmap_del(hmap, key);
+          } else if (strncmp(commands[1], HMAP_COMMAND_PRINT, strlen(HMAP_COMMAND_PRINT)) == 0) {
+            command_length_check(!=, 2);
+            hashmap_print(hmap);
           }
         } else if (strncmp(commands[0], AVL_COMMAND, strlen(AVL_COMMAND)) == 0) {
           command_length_check(!=, 3);

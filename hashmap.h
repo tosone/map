@@ -6,6 +6,7 @@
 #define HMAP_COMMAND_DEL "del"
 #define HMAP_COMMAND_CAP "cap"
 #define HMAP_COMMAND_LEN "len"
+#define HMAP_COMMAND_PRINT "print"
 
 typedef struct hashmap_entry_t {
   char *key;
@@ -25,5 +26,6 @@ hashmap_entry_t *hashmap_pair(const char *key, const void *value, const int valu
 hashmap_t *hashmap_set(hashmap_t *hashmap, const char *key, const void *value, const int value_length);
 void *hashmap_get(hashmap_t *hashmap, const char *key, size_t *value_length);
 void hashmap_del(hashmap_t *hashmap, const char *key);
+void hashmap_print(hashmap_t *hashmap);
 void hashmap_free(hashmap_t *hashmap);
 void hashmap_iterate(hashmap_t *hashmap, void (*f)(hashmap_entry_t *entry));
