@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include <avl.h>
+#include <base64.h>
 #include <command.h>
 #include <error.h>
 #include <hashmap.h>
@@ -161,6 +162,22 @@ int main(int argc, char **argv) {
             char *filename = commands[2];
             avl_dump(avl, filename);
           }
+        } else if (strncmp(commands[0], BASE64_COMMAND, strlen(BASE64_COMMAND)) == 0) {
+          command_length_check(<, 3);
+          if (strncmp(commands[1], BASE64_COMMAND_ENCODE, strlen(BASE64_COMMAND_ENCODE)) == 0) {
+            char *string = commands[2];
+            size_t out = 0;
+            unsigned char *outstring = base64_encode((unsigned char *)string, strlen(string), &out);
+            if (outstring[out - 1] == 10) {
+              outstring[out - 1] = 0;
+            }
+            printf("%s\n", outstring);
+          } else if (strncmp(commands[1], BASE64_COMMAND_DECODE, strlen(BASE64_COMMAND_DECODE)) == 0) {
+            char *string = commands[2];
+            size_t out = 0;
+            unsigned char *outstring = base64_decode((unsigned char *)string, strlen(string) + 1, &out);
+            printf("%s\n", outstring);
+          }
         } else {
           printf("%s\n", ERR_COMMAND_NOT_FOUND);
         }
@@ -179,6 +196,10 @@ void completion(const char *buf, linenoiseCompletions *lc) {
     linenoiseAddCompletion(lc, "lru");
   } else if (buf[0] == 'h') {
     linenoiseAddCompletion(lc, "hmap");
+  } else if (buf[0] == 'a') {
+    linenoiseAddCompletion(lc, "avl");
+  } else if (buf[0] == 'b') {
+    linenoiseAddCompletion(lc, "base64");
   }
 }
 
@@ -215,6 +236,12 @@ char *hints(const char *buf, int *color, int *bold) {
     return " <pre/in/post>";
   } else if (strcmp(buf, "avl dump") == 0) {
     return " <filename>";
+  } else if (strcmp(buf, "base64") == 0) {
+    return " <command> <string>";
+  } else if (strcmp(buf, "base64 dec") == 0) {
+    return " <string>";
+  } else if (strcmp(buf, "base64 enc") == 0) {
+    return " <string>";
   }
   return NULL;
 }
