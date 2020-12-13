@@ -5,7 +5,7 @@
 
 Commands Commands_parse(char *cmd, int *len) {
   int index = 0;
-  Commands commands;
+  Commands commands = NULL;
   char *token = strtok(cmd, " ");
   while (token != NULL) {
     if (index == 0) { // 虽然这个地方花费的时间会比较多，但是功能是解析人敲的命令，一般不会太长，所以还 OK
