@@ -21,4 +21,6 @@ avl_entry_t *avl_create(avl_entry_t *node, int key);
 avl_entry_t *avl_set(avl_entry_t *node, int key);
 bool avl_get(avl_entry_t *root, int key);
 void val_pre_order(avl_entry_t *entry);
+void val_in_order(avl_entry_t *entry);
+void val_post_order(avl_entry_t *entry);
 void avl_free(avl_entry_t *entry);
