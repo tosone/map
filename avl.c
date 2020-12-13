@@ -108,43 +108,65 @@ bool avl_get(avl_entry_t *root, int key) {
   return false;
 }
 
-void val_pre_order_helper(avl_entry_t *root) {
+void avl_pre_order_helper(avl_entry_t *root) {
   if (root != NULL) {
     printf("%d ", root->key);
-    val_pre_order_helper(root->left);
-    val_pre_order_helper(root->right);
+    avl_pre_order_helper(root->left);
+    avl_pre_order_helper(root->right);
   }
 }
 
-void val_pre_order(avl_entry_t *entry) {
-  val_pre_order_helper(entry);
+void avl_pre_order(avl_entry_t *entry) {
+  avl_pre_order_helper(entry);
   printf("\n");
 }
 
-void val_in_order_helper(avl_entry_t *root) {
+void avl_in_order_helper(avl_entry_t *root) {
   if (root != NULL) {
-    val_in_order_helper(root->left);
+    avl_in_order_helper(root->left);
     printf("%d ", root->key);
-    val_in_order_helper(root->right);
+    avl_in_order_helper(root->right);
   }
 }
 
-void val_in_order(avl_entry_t *entry) {
-  val_in_order_helper(entry);
+void avl_in_order(avl_entry_t *entry) {
+  avl_in_order_helper(entry);
   printf("\n");
 }
 
-void val_post_order_helper(avl_entry_t *root) {
+void avl_post_order_helper(avl_entry_t *root) {
   if (root != NULL) {
-    val_post_order_helper(root->left);
-    val_post_order_helper(root->right);
+    avl_post_order_helper(root->left);
+    avl_post_order_helper(root->right);
     printf("%d ", root->key);
   }
 }
 
-void val_post_order(avl_entry_t *entry) {
-  val_post_order_helper(entry);
+void avl_post_order(avl_entry_t *entry) {
+  avl_post_order_helper(entry);
   printf("\n");
+}
+
+void avl_dump_helper(avl_entry_t *entry, FILE *stream) {
+  if (entry != NULL) {
+    fprintf(stream, "%d [shape=box];\n", entry->key);
+    if (entry->left != NULL) {
+      fprintf(stream, "%d -> %d;\n", entry->key, entry->left->key);
+    }
+    if (entry->right != NULL) {
+      fprintf(stream, "%d -> %d;\n", entry->key, entry->right->key);
+    }
+    avl_post_order_helper(entry->left);
+    avl_post_order_helper(entry->right);
+  }
+}
+
+void avl_dump(avl_entry_t *entry, char *filename) {
+  FILE *stream = fopen(filename, "w+");
+  fprintf(stream, "digraph {\n");
+  avl_dump_helper(entry, stream);
+  fprintf(stream, "}\n");
+  fclose(stream);
 }
 
 avl_entry_t *avl_create(avl_entry_t *node, int key) {

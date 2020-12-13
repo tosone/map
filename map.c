@@ -138,21 +138,28 @@ int main(int argc, char **argv) {
             hashmap_print(hmap);
           }
         } else if (strncmp(commands[0], AVL_COMMAND, strlen(AVL_COMMAND)) == 0) {
-          command_length_check(!=, 3);
+          command_length_check(<, 3);
           if (strncmp(commands[1], AVL_COMMAND_SET, strlen(AVL_COMMAND_SET)) == 0) {
+            command_length_check(!=, 3);
             int key = atoi(commands[2]);
             avl = avl_set(avl, key);
           } else if (strncmp(commands[1], AVL_COMMAND_GET, strlen(AVL_COMMAND_GET)) == 0) {
+            command_length_check(!=, 3);
             int key = atoi(commands[2]);
             printf("%s\n", avl_get(avl, key) ? "true" : "false");
           } else if (strncmp(commands[1], AVL_COMMAND_PRINT, strlen(AVL_COMMAND_PRINT)) == 0) {
+            command_length_check(!=, 3);
             if (strncmp(commands[2], AVL_COMMAND_PRE, strlen(AVL_COMMAND_PRE)) == 0) {
-              val_pre_order(avl);
+              avl_pre_order(avl);
             } else if (strncmp(commands[2], AVL_COMMAND_IN, strlen(AVL_COMMAND_IN)) == 0) {
-              val_in_order(avl);
+              avl_in_order(avl);
             } else if (strncmp(commands[2], AVL_COMMAND_POST, strlen(AVL_COMMAND_POST)) == 0) {
-              val_post_order(avl);
+              avl_post_order(avl);
             }
+          } else if (strncmp(commands[1], AVL_COMMAND_DUMP, strlen(AVL_COMMAND_DUMP)) == 0) {
+            command_length_check(!=, 3);
+            char *filename = commands[2];
+            avl_dump(avl, filename);
           }
         } else {
           printf("%s\n", ERR_COMMAND_NOT_FOUND);
@@ -198,6 +205,16 @@ char *hints(const char *buf, int *color, int *bold) {
     return " <key> <value>";
   } else if (strcmp(buf, "hmap del") == 0) {
     return " <key>";
+  } else if (strcmp(buf, "avl") == 0) {
+    return " <command> <params>";
+  } else if (strcmp(buf, "avl get") == 0) {
+    return " <key>";
+  } else if (strcmp(buf, "avl set") == 0) {
+    return " <key>";
+  } else if (strcmp(buf, "avl print") == 0) {
+    return " <pre/in/post>";
+  } else if (strcmp(buf, "avl dump") == 0) {
+    return " <filename>";
   }
   return NULL;
 }
