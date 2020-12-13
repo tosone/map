@@ -22,6 +22,11 @@ LRU 数据结构。包含的命令有：
 
 AVL-Tree 数据结构。包含的命令：
 
-- `avl set <key>`
-- `avl get <key>`
-- `avl print <pre/in/post>`
+- `avl set <key>` 将 key 插入到 avl tree 中。
+- `avl get <key>` 判断 key 是否存在于 avl tree 中。
+- `avl print <pre/in/post>` 以前序、中序、后序方式遍历 avl tree。
+- `avl dump <filename>` 将 avl tree 中的数据导出至 dot。
+
+## 参考
+
+- 转换 dot 文件到 png `dot -Tpng filename.dot -o filename.png`。
