@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <avl.h>
 #include <command.h>
 #include <error.h>
 #include <hashmap.h>
@@ -28,10 +29,12 @@ char *hints(const char *buf, int *color, int *bold);
 
 hashmap_t *hmap;
 LRU *lru;
+avl_entry_t *avl;
 
 void clear() {
   hashmap_free(hmap);
   LRU_free(lru);
+  avl_free(avl);
   printf("clear all, bye\n");
 }
 
@@ -127,6 +130,19 @@ int main(int argc, char **argv) {
             command_length_check(!=, 3);
             char *key = commands[2];
             hashmap_del(hmap, key);
+          }
+        } else if (strncmp(commands[0], AVL_COMMAND, strlen(AVL_COMMAND)) == 0) {
+          command_length_check(!=, 3);
+          if (strncmp(commands[1], AVL_COMMAND_SET, strlen(AVL_COMMAND_SET)) == 0) {
+            int key = atoi(commands[2]);
+            avl = avl_set(avl, key);
+          } else if (strncmp(commands[1], AVL_COMMAND_GET, strlen(AVL_COMMAND_GET)) == 0) {
+            int key = atoi(commands[2]);
+            printf("%s\n", avl_get(avl, key) ? "true" : "false");
+          } else if (strncmp(commands[1], AVL_COMMAND_PRINT, strlen(AVL_COMMAND_PRINT)) == 0) {
+            if (strncmp(commands[2], AVL_COMMAND_PRE, strlen(AVL_COMMAND_PRE)) == 0) {
+              val_pre_order(avl);
+            }
           }
         } else {
           printf("%s\n", ERR_COMMAND_NOT_FOUND);
