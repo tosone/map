@@ -148,6 +148,10 @@ int main(int argc, char **argv) {
           } else if (strncmp(commands[1], AVL_COMMAND_PRINT, strlen(AVL_COMMAND_PRINT)) == 0) {
             if (strncmp(commands[2], AVL_COMMAND_PRE, strlen(AVL_COMMAND_PRE)) == 0) {
               val_pre_order(avl);
+            } else if (strncmp(commands[2], AVL_COMMAND_IN, strlen(AVL_COMMAND_IN)) == 0) {
+              val_in_order(avl);
+            } else if (strncmp(commands[2], AVL_COMMAND_POST, strlen(AVL_COMMAND_POST)) == 0) {
+              val_post_order(avl);
             }
           }
         } else {

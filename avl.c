@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -109,22 +108,42 @@ bool avl_get(avl_entry_t *root, int key) {
   return false;
 }
 
-void val_pre_order_helper(avl_entry_t *root, bool first) {
+void val_pre_order_helper(avl_entry_t *root) {
   if (root != NULL) {
-    if (first) {
-      first = false;
-      printf("%d", root->key);
-    } else {
-      printf(" %d", root->key);
-    }
-
-    val_pre_order_helper(root->left, first);
-    val_pre_order_helper(root->right, first);
+    printf("%d ", root->key);
+    val_pre_order_helper(root->left);
+    val_pre_order_helper(root->right);
   }
 }
 
 void val_pre_order(avl_entry_t *entry) {
-  val_pre_order_helper(entry, true);
+  val_pre_order_helper(entry);
+  printf("\n");
+}
+
+void val_in_order_helper(avl_entry_t *root) {
+  if (root != NULL) {
+    val_in_order_helper(root->left);
+    printf("%d ", root->key);
+    val_in_order_helper(root->right);
+  }
+}
+
+void val_in_order(avl_entry_t *entry) {
+  val_in_order_helper(entry);
+  printf("\n");
+}
+
+void val_post_order_helper(avl_entry_t *root) {
+  if (root != NULL) {
+    val_post_order_helper(root->left);
+    val_post_order_helper(root->right);
+    printf("%d ", root->key);
+  }
+}
+
+void val_post_order(avl_entry_t *entry) {
+  val_post_order_helper(entry);
   printf("\n");
 }
 
