@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
             if (value == NULL) {
               printf("key not found\n");
             } else {
-              printf("%s %lu %lu\n", value, strlen(value), value_length);
+              printf("%s\n", value);
             }
           } else if (strncmp(commands[1], LRU_COMMAND_CAP, strlen(LRU_COMMAND_CAP)) == 0) {
             command_length_check(<, 3);
