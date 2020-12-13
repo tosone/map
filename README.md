@@ -29,6 +29,11 @@ AVL-Tree 数据结构。包含的命令：
 - `avl print <pre/in/post>` 以前序、中序、后序方式遍历 avl tree。
 - `avl dump <filename>` 将 avl tree 中的数据导出至 dot。
 
+Base64 包含的命令：
+
+- `base64 enc <string>` 编码 string 为 base64 字符串。
+- `base64 dec <string>` 解码 base64 字符串。
+
 ## 示例
 
 |HashMap|LRU|AVL-Tree|
