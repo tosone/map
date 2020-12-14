@@ -15,6 +15,9 @@
 #include <hashmap.h>
 #include <linenoise.h>
 #include <lru.h>
+#include <md2.h>
+#include <md4.h>
+#include <md5.h>
 #include <version.h>
 
 #define command_length_check(x, y)            \
@@ -201,6 +204,7 @@ int main(int argc, char **argv) {
             } else {
               printf("%s\n", outstring);
             }
+            free(outstring);
           } else if (strncmp(commands[1], BASE64URL_COMMAND_DECODE, strlen(BASE64URL_COMMAND_DECODE)) == 0) {
             char *string = commands[2];
             unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
@@ -210,6 +214,7 @@ int main(int argc, char **argv) {
             } else {
               printf("%s\n", outstring);
             }
+            free(outstring);
           } else {
             printf("%s\n", ERR_COMMAND_NOT_FOUND);
           }
@@ -224,6 +229,7 @@ int main(int argc, char **argv) {
             } else {
               printf("%s\n", outstring);
             }
+            free(outstring);
           } else if (strncmp(commands[1], BASE32_COMMAND_DECODE, strlen(BASE32_COMMAND_DECODE)) == 0) {
             char *string = commands[2];
             unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
@@ -233,6 +239,7 @@ int main(int argc, char **argv) {
             } else {
               printf("%s\n", outstring);
             }
+            free(outstring);
           } else {
             printf("%s\n", ERR_COMMAND_NOT_FOUND);
           }
@@ -247,6 +254,7 @@ int main(int argc, char **argv) {
             } else {
               printf("%s\n", outstring);
             }
+            free(outstring);
           } else if (strncmp(commands[1], BASE16_COMMAND_DECODE, strlen(BASE16_COMMAND_DECODE)) == 0) {
             char *string = commands[2];
             unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
@@ -256,9 +264,91 @@ int main(int argc, char **argv) {
             } else {
               printf("%s\n", outstring);
             }
+            free(outstring);
           } else {
             printf("%s\n", ERR_COMMAND_NOT_FOUND);
           }
+        } else if (strncmp(commands[0], MD5_COMMAND, strlen(MD5_COMMAND)) == 0) {
+          command_length_check(!=, 2);
+          char *string = commands[1];
+          hash_state *context = (hash_state *)malloc(sizeof(hash_state));
+          if (md5_init(context) != CRYPT_OK) {
+            printf("%s\n", ERR_INTERNAL);
+            goto md5flag;
+          }
+          if (md5_process(context, (unsigned char *)string, strlen(string)) != CRYPT_OK) {
+            printf("%s\n", ERR_INTERNAL);
+            goto md5flag;
+          }
+          unsigned char *outbyte = (unsigned char *)calloc(MD5_SIZE, sizeof(unsigned char));
+          if (md5_done(context, outbyte) != CRYPT_OK) {
+            printf("%s\n", ERR_INTERNAL);
+            goto md5flag;
+          }
+          unsigned long out = MD5_SIZE * 2 + 1;
+          char *outstring = (char *)calloc(out, sizeof(char));
+          if (base16_encode(outbyte, MD5_SIZE, outstring, &out, 0) != CRYPT_OK) {
+            printf("%s\n", ERR_INTERNAL);
+          } else {
+            printf("%s\n", outstring);
+          }
+          free(outstring);
+        md5flag:
+          free(context);
+        } else if (strncmp(commands[0], MD4_COMMAND, strlen(MD4_COMMAND)) == 0) {
+          command_length_check(!=, 2);
+          char *string = commands[1];
+          hash_state *context = (hash_state *)malloc(sizeof(hash_state));
+          if (md4_init(context) != CRYPT_OK) {
+            printf("%s\n", ERR_INTERNAL);
+            goto md4flag;
+          }
+          if (md4_process(context, (unsigned char *)string, strlen(string)) != CRYPT_OK) {
+            printf("%s\n", ERR_INTERNAL);
+            goto md4flag;
+          }
+          unsigned char *outbyte = (unsigned char *)calloc(MD4_SIZE, sizeof(unsigned char));
+          if (md4_done(context, outbyte) != CRYPT_OK) {
+            printf("%s\n", ERR_INTERNAL);
+            goto md4flag;
+          }
+          unsigned long out = MD4_SIZE * 2 + 1;
+          char *outstring = (char *)calloc(out, sizeof(char));
+          if (base16_encode(outbyte, MD4_SIZE, outstring, &out, 0) != CRYPT_OK) {
+            printf("%s\n", ERR_INTERNAL);
+          } else {
+            printf("%s\n", outstring);
+          }
+          free(outstring);
+        md4flag:
+          free(context);
+        } else if (strncmp(commands[0], MD2_COMMAND, strlen(MD2_COMMAND)) == 0) {
+          command_length_check(!=, 2);
+          char *string = commands[1];
+          hash_state *context = (hash_state *)malloc(sizeof(hash_state));
+          if (md2_init(context) != CRYPT_OK) {
+            printf("%s\n", ERR_INTERNAL);
+            goto md2flag;
+          }
+          if (md2_process(context, (unsigned char *)string, strlen(string)) != CRYPT_OK) {
+            printf("%s\n", ERR_INTERNAL);
+            goto md2flag;
+          }
+          unsigned char *outbyte = (unsigned char *)calloc(MD2_SIZE, sizeof(unsigned char));
+          if (md2_done(context, outbyte) != CRYPT_OK) {
+            printf("%s\n", ERR_INTERNAL);
+            goto md2flag;
+          }
+          unsigned long out = MD2_SIZE * 2 + 1;
+          char *outstring = (char *)calloc(out, sizeof(char));
+          if (base16_encode(outbyte, MD2_SIZE, outstring, &out, 0) != CRYPT_OK) {
+            printf("%s\n", ERR_INTERNAL);
+          } else {
+            printf("%s\n", outstring);
+          }
+          free(outstring);
+        md2flag:
+          free(context);
         } else {
           printf("%s\n", ERR_COMMAND_NOT_FOUND);
         }
