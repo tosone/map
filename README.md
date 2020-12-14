@@ -38,8 +38,8 @@ Base64 包含的命令：
 
 |HashMap|LRU|AVL-Tree|
 |:---:|:---:|:---:|
-|![hashmap](./image/hashmap.png)|![hashmap](./image/lru.png)|![hashmap](./image/avl.png)|
+|![hashmap](./image/hashmap.png)|![lru](./image/lru.png)|![avl](./image/avl.png)|
 
 ## 参考
 
-- 转换 dot 文件到 png: `dot -Tpng filename.dot -o filename.png`。
+- `dot -Tpng filename.dot -o filename.png` 转换 dot 文件到 png。
