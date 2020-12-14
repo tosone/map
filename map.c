@@ -3,8 +3,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <tomcrypt.h>
+
 #include <avl.h>
+#include <base16.h>
+#include <base32.h>
 #include <base64.h>
+#include <base64url.h>
 #include <command.h>
 #include <error.h>
 #include <hashmap.h>
@@ -166,17 +171,93 @@ int main(int argc, char **argv) {
           command_length_check(<, 3);
           if (strncmp(commands[1], BASE64_COMMAND_ENCODE, strlen(BASE64_COMMAND_ENCODE)) == 0) {
             char *string = commands[2];
-            size_t out = 0;
-            unsigned char *outstring = base64_encode((unsigned char *)string, strlen(string), &out);
-            if (outstring[out - 1] == 10) {
-              outstring[out - 1] = 0;
+            unsigned long out = 4 * ((strlen(string) + 2) / 3);
+            char *outstring = (char *)calloc(out, sizeof(char));
+            if (base64_encode((unsigned char *)string, strlen(string), outstring, &out) != CRYPT_OK) {
+              printf("%s\n", ERR_INTERNAL);
+            } else {
+              printf("%s\n", outstring);
             }
-            printf("%s\n", outstring);
           } else if (strncmp(commands[1], BASE64_COMMAND_DECODE, strlen(BASE64_COMMAND_DECODE)) == 0) {
             char *string = commands[2];
-            size_t out = 0;
-            unsigned char *outstring = base64_decode((unsigned char *)string, strlen(string) + 1, &out);
-            printf("%s\n", outstring);
+            unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
+            unsigned long out = sizeof(outstring);
+            if (base64_decode(string, strlen(string) + 1, outstring, &out)) {
+              printf("%s\n", ERR_INTERNAL);
+            } else {
+              printf("%s\n", outstring);
+            }
+          } else {
+            printf("%s\n", ERR_COMMAND_NOT_FOUND);
+          }
+        } else if (strncmp(commands[0], BASE64URL_COMMAND, strlen(BASE64URL_COMMAND)) == 0) {
+          command_length_check(<, 3);
+          if (strncmp(commands[1], BASE64URL_COMMAND_ENCODE, strlen(BASE64URL_COMMAND_ENCODE)) == 0) {
+            char *string = commands[2];
+            unsigned long out = 4 * ((strlen(string) + 2) / 3);
+            char *outstring = (char *)calloc(out, sizeof(char));
+            if (base64url_encode((unsigned char *)string, strlen(string), outstring, &out) != CRYPT_OK) {
+              printf("%s\n", ERR_INTERNAL);
+            } else {
+              printf("%s\n", outstring);
+            }
+          } else if (strncmp(commands[1], BASE64URL_COMMAND_DECODE, strlen(BASE64URL_COMMAND_DECODE)) == 0) {
+            char *string = commands[2];
+            unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
+            unsigned long out = sizeof(outstring);
+            if (base64url_decode(string, strlen(string), outstring, &out)) {
+              printf("%s\n", ERR_INTERNAL);
+            } else {
+              printf("%s\n", outstring);
+            }
+          } else {
+            printf("%s\n", ERR_COMMAND_NOT_FOUND);
+          }
+        } else if (strncmp(commands[0], BASE32_COMMAND, strlen(BASE32_COMMAND)) == 0) {
+          command_length_check(<, 3);
+          if (strncmp(commands[1], BASE32_COMMAND_ENCODE, strlen(BASE32_COMMAND_ENCODE)) == 0) {
+            char *string = commands[2];
+            unsigned long out = (8 * strlen(string) + 4) / 5 + 1;
+            char *outstring = (char *)calloc(out, sizeof(char));
+            if (base32_encode((unsigned char *)string, strlen(string), outstring, &out, BASE32_RFC4648) != CRYPT_OK) {
+              printf("%s\n", ERR_INTERNAL);
+            } else {
+              printf("%s\n", outstring);
+            }
+          } else if (strncmp(commands[1], BASE32_COMMAND_DECODE, strlen(BASE32_COMMAND_DECODE)) == 0) {
+            char *string = commands[2];
+            unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
+            unsigned long out = sizeof(outstring);
+            if (base32_decode(string, strlen(string), outstring, &out, BASE32_RFC4648) != CRYPT_OK) {
+              printf("%s\n", ERR_INTERNAL);
+            } else {
+              printf("%s\n", outstring);
+            }
+          } else {
+            printf("%s\n", ERR_COMMAND_NOT_FOUND);
+          }
+        } else if (strncmp(commands[0], BASE16_COMMAND, strlen(BASE16_COMMAND)) == 0) {
+          command_length_check(<, 3);
+          if (strncmp(commands[1], BASE16_COMMAND_ENCODE, strlen(BASE16_COMMAND_ENCODE)) == 0) {
+            char *string = commands[2];
+            unsigned long out = strlen(string) * 2 + 1;
+            char *outstring = (char *)calloc(out, sizeof(char));
+            if (base16_encode((unsigned char *)string, strlen(string), outstring, &out, 0) != CRYPT_OK) {
+              printf("%s\n", ERR_INTERNAL);
+            } else {
+              printf("%s\n", outstring);
+            }
+          } else if (strncmp(commands[1], BASE16_COMMAND_DECODE, strlen(BASE16_COMMAND_DECODE)) == 0) {
+            char *string = commands[2];
+            unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
+            unsigned long out = sizeof(outstring);
+            if (base16_decode(string, strlen(string), outstring, &out) != CRYPT_OK) {
+              printf("%s\n", ERR_INTERNAL);
+            } else {
+              printf("%s\n", outstring);
+            }
+          } else {
+            printf("%s\n", ERR_COMMAND_NOT_FOUND);
           }
         } else {
           printf("%s\n", ERR_COMMAND_NOT_FOUND);
