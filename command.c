@@ -3,9 +3,9 @@
 
 #include <command.h>
 
-Commands Commands_parse(char *cmd, int *len) {
+commands_t commands_parse(char *cmd, int *len) {
   int index = 0;
-  Commands commands = NULL;
+  commands_t commands = NULL;
   char *token = strtok(cmd, " ");
   while (token != NULL) {
     if (index == 0) { // 虽然这个地方花费的时间会比较多，但是功能是解析人敲的命令，一般不会太长，所以还 OK
@@ -23,7 +23,7 @@ Commands Commands_parse(char *cmd, int *len) {
   return commands;
 }
 
-void Commands_free(Commands commands, int length) {
+void commands_free(commands_t commands, int length) {
   for (int i = 0; i < length; i++) {
     free(commands[i]); // 释放每个字符串的空间
   }
