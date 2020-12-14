@@ -23,7 +23,7 @@
 #define command_length_check(x, y)            \
   if (commands_length x y) {                  \
     printf("%s\n", ERR_COMMAND);              \
-    Commands_free(commands, commands_length); \
+    commands_free(commands, commands_length); \
     continue;                                 \
   }
 
@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
       memcpy(line_copy, line, strlen(line) + 1);
 
       int commands_length;
-      Commands commands = Commands_parse(line, &commands_length);
+      commands_t commands = commands_parse(line, &commands_length);
 
       free(line_copy);
 
@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
         if (strncmp(commands[0], MAP_HELP, strlen(MAP_HELP)) == 0) {
           printf("%s\n", VERSION);
         } else if (strncmp(commands[0], MAP_EXIT, strlen(MAP_EXIT)) == 0) {
-          Commands_free(commands, commands_length);
+          commands_free(commands, commands_length);
           return EXIT_SUCCESS;
         } else if (strncmp(commands[0], VERSION_COMMAND, strlen(VERSION_COMMAND)) == 0) {
           printf("%s\n", VERSION);
@@ -355,7 +355,7 @@ int main(int argc, char **argv) {
       } else {
         printf("%s\n", ERR_COMMAND);
       }
-      Commands_free(commands, commands_length);
+      commands_free(commands, commands_length);
     }
     free(line);
   }

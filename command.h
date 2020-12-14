@@ -1,6 +1,6 @@
 #pragma once
 
-typedef char **Commands;
+typedef char **commands_t;
 
-Commands Commands_parse(char *cmd, int *len);
-void Commands_free(Commands commands, int length);
+commands_t commands_parse(char *cmd, int *len);
+void commands_free(commands_t commands, int length);
