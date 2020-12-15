@@ -12,12 +12,10 @@
 #include <base64url.h>
 #include <command.h>
 #include <error.h>
+#include <hash.h>
 #include <hashmap.h>
 #include <linenoise.h>
 #include <lru.h>
-#include <md2.h>
-#include <md4.h>
-#include <md5.h>
 #include <version.h>
 
 #define command_length_check(x, y)            \
@@ -56,6 +54,18 @@ int main(int argc, char **argv) {
   hmap = hashmap_create();
   lru = LRU_create();
   atexit(clear);
+  // ERR_INTERNAL1("sd");
+  // printf("[%s] %s:%d %s: %s\n", __DATE__, __FILE__, __LINE__, ERR_INTERNAL, "123");
+  // printf("%s %d\n", __FILE__, __LINE__, __DATE__);
+  if (register_all_ciphers() != CRYPT_OK) {
+    ERR_INTERNAL1("register all ciphers with error.");
+    // printf("[%s] %s:%d %s\n", ERR_INTERNAL, __LINE__);
+  }
+  if (register_all_hashes() != CRYPT_OK) {
+    ERR_INTERNAL1("register all hashes with error.");
+  }
+  register_all_prngs();
+  // printf("60: %d\n", find_hash("md5"));
 
   char *line;
   while ((line = linenoise("map> ")) != NULL) {
@@ -268,86 +278,37 @@ int main(int argc, char **argv) {
           } else {
             printf("%s\n", ERR_COMMAND_NOT_FOUND);
           }
-        } else if (strncmp(commands[0], MD5_COMMAND, strlen(MD5_COMMAND)) == 0) {
-          command_length_check(!=, 2);
-          char *string = commands[1];
+        } else if (strncmp(commands[0], HASH_COMMAND, strlen(HASH_COMMAND)) == 0) {
+          command_length_check(!=, 3);
+          char *hash_name = commands[1];
+          char *string = commands[2];
           hash_state *context = (hash_state *)malloc(sizeof(hash_state));
-          if (md5_init(context) != CRYPT_OK) {
-            printf("%s\n", ERR_INTERNAL);
-            goto md5flag;
+          int hash_index = find_hash(hash_name);
+          if (hash_index < 0) {
+            printf("cannot find hash method\n");
           }
-          if (md5_process(context, (unsigned char *)string, strlen(string)) != CRYPT_OK) {
+          if (hash_descriptor[hash_index].init(context) != CRYPT_OK) {
             printf("%s\n", ERR_INTERNAL);
-            goto md5flag;
+            goto hashflag;
           }
-          unsigned char *outbyte = (unsigned char *)calloc(MD5_SIZE, sizeof(unsigned char));
-          if (md5_done(context, outbyte) != CRYPT_OK) {
+          if (hash_descriptor[hash_index].process(context, (unsigned char *)string, strlen(string)) != CRYPT_OK) {
             printf("%s\n", ERR_INTERNAL);
-            goto md5flag;
+            goto hashflag;
           }
-          unsigned long out = MD5_SIZE * 2 + 1;
+          unsigned char *outbyte = (unsigned char *)calloc(hash_descriptor[hash_index].hashsize, sizeof(unsigned char));
+          if (hash_descriptor[hash_index].done(context, outbyte) != CRYPT_OK) {
+            printf("%s\n", ERR_INTERNAL);
+            goto hashflag;
+          }
+          unsigned long out = hash_descriptor[hash_index].hashsize * 2 + 1;
           char *outstring = (char *)calloc(out, sizeof(char));
-          if (base16_encode(outbyte, MD5_SIZE, outstring, &out, 0) != CRYPT_OK) {
+          if (base16_encode(outbyte, hash_descriptor[hash_index].hashsize, outstring, &out, 0) != CRYPT_OK) {
             printf("%s\n", ERR_INTERNAL);
           } else {
             printf("%s\n", outstring);
           }
           free(outstring);
-        md5flag:
-          free(context);
-        } else if (strncmp(commands[0], MD4_COMMAND, strlen(MD4_COMMAND)) == 0) {
-          command_length_check(!=, 2);
-          char *string = commands[1];
-          hash_state *context = (hash_state *)malloc(sizeof(hash_state));
-          if (md4_init(context) != CRYPT_OK) {
-            printf("%s\n", ERR_INTERNAL);
-            goto md4flag;
-          }
-          if (md4_process(context, (unsigned char *)string, strlen(string)) != CRYPT_OK) {
-            printf("%s\n", ERR_INTERNAL);
-            goto md4flag;
-          }
-          unsigned char *outbyte = (unsigned char *)calloc(MD4_SIZE, sizeof(unsigned char));
-          if (md4_done(context, outbyte) != CRYPT_OK) {
-            printf("%s\n", ERR_INTERNAL);
-            goto md4flag;
-          }
-          unsigned long out = MD4_SIZE * 2 + 1;
-          char *outstring = (char *)calloc(out, sizeof(char));
-          if (base16_encode(outbyte, MD4_SIZE, outstring, &out, 0) != CRYPT_OK) {
-            printf("%s\n", ERR_INTERNAL);
-          } else {
-            printf("%s\n", outstring);
-          }
-          free(outstring);
-        md4flag:
-          free(context);
-        } else if (strncmp(commands[0], MD2_COMMAND, strlen(MD2_COMMAND)) == 0) {
-          command_length_check(!=, 2);
-          char *string = commands[1];
-          hash_state *context = (hash_state *)malloc(sizeof(hash_state));
-          if (md2_init(context) != CRYPT_OK) {
-            printf("%s\n", ERR_INTERNAL);
-            goto md2flag;
-          }
-          if (md2_process(context, (unsigned char *)string, strlen(string)) != CRYPT_OK) {
-            printf("%s\n", ERR_INTERNAL);
-            goto md2flag;
-          }
-          unsigned char *outbyte = (unsigned char *)calloc(MD2_SIZE, sizeof(unsigned char));
-          if (md2_done(context, outbyte) != CRYPT_OK) {
-            printf("%s\n", ERR_INTERNAL);
-            goto md2flag;
-          }
-          unsigned long out = MD2_SIZE * 2 + 1;
-          char *outstring = (char *)calloc(out, sizeof(char));
-          if (base16_encode(outbyte, MD2_SIZE, outstring, &out, 0) != CRYPT_OK) {
-            printf("%s\n", ERR_INTERNAL);
-          } else {
-            printf("%s\n", outstring);
-          }
-          free(outstring);
-        md2flag:
+        hashflag:
           free(context);
         } else {
           printf("%s\n", ERR_COMMAND_NOT_FOUND);
