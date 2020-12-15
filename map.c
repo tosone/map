@@ -2,23 +2,55 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include <tomcrypt.h>
 
 #include <avl.h>
-#include <base16.h>
-#include <base32.h>
-#include <base64.h>
-#include <base64url.h>
 #include <command.h>
-#include <error.h>
-#include <hash.h>
 #include <hashmap.h>
-#include <help.h>
 #include <linenoise.h>
 #include <lru.h>
-#include <prng.h>
-#include <version.h>
+
+#define VERSION "v1.0.0"
+
+#define VERSION_COMMAND "version"
+#define HELP_COMMAND "help"
+#define PRNG_COMMAND "prng"
+#define HASH_COMMAND "hash"
+
+#define BASE64_COMMAND "base64"
+#define BASE64_COMMAND_DECODE "dec"
+#define BASE64_COMMAND_ENCODE "enc"
+
+#define BASE64URL_COMMAND "base64url"
+#define BASE64URL_COMMAND_DECODE "dec"
+#define BASE64URL_COMMAND_ENCODE "enc"
+
+#define BASE32_COMMAND "base32"
+#define BASE32_COMMAND_DECODE "dec"
+#define BASE32_COMMAND_ENCODE "enc"
+
+#define BASE16_COMMAND "base16"
+#define BASE16_COMMAND_DECODE "dec"
+#define BASE16_COMMAND_ENCODE "enc"
+
+#define ERR_COMMAND "invalid command"
+#define ERR_COMMAND_NOT_FOUND "command not found"
+
+#define ERR_INTERNAL "internal error"
+
+void map_err(char *level, char *info) {
+#ifdef NDEBUG
+  time_t t = time(NULL);
+  struct tm *tm = localtime(&t);
+  char buf[16];
+  buf[strftime(buf, sizeof(buf), "%H:%M:%S", tm)] = '\0';
+  printf("[%s] %s:%d %s: %s.\n", buf, __FILE__, __LINE__, level, info);
+#else
+  printf("%s: %s.\n", level, info);
+#endif
+}
 
 #define MAP_COMMANDS_OK true
 #define MAP_COMMANDS_ERROR false
