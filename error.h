@@ -1,6 +1,19 @@
+#include <time.h>
+
 #pragma once
 
-#define ERR_COMMAND "Invalid command"
-#define ERR_COMMAND_NOT_FOUND "Command not found"
+#define ERR_COMMAND "invalid command"
+#define ERR_COMMAND_NOT_FOUND "command not found"
 
-#define ERR_INTERNAL(x) printf("[%s] %s:%d %s: %s.\n", __DATE__, __FILE__, __LINE__, "Internal error", x)
+#define ERR_INTERNAL "internal error"
+
+void map_err(char *level, char *info) {
+#ifdef NDEBUG
+  time_t t = time(NULL);
+  char buf[16];
+  buf[strftime(buf, sizeof(buf), "%H:%M:%S", t)] = '\0';
+  printf("[%s] %s:%d %s: %s.\n", buf, __FILE__, __LINE__, level, x);
+#else
+  printf("%s: %s.\n", level, info);
+#endif
+}
