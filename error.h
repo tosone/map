@@ -10,9 +10,10 @@
 void map_err(char *level, char *info) {
 #ifdef NDEBUG
   time_t t = time(NULL);
+  struct tm *tm = localtime(&t);
   char buf[16];
-  buf[strftime(buf, sizeof(buf), "%H:%M:%S", t)] = '\0';
-  printf("[%s] %s:%d %s: %s.\n", buf, __FILE__, __LINE__, level, x);
+  buf[strftime(buf, sizeof(buf), "%H:%M:%S", tm)] = '\0';
+  printf("[%s] %s:%d %s: %s.\n", buf, __FILE__, __LINE__, level, info);
 #else
   printf("%s: %s.\n", level, info);
 #endif
