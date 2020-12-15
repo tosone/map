@@ -14,6 +14,7 @@
 #include <error.h>
 #include <hash.h>
 #include <hashmap.h>
+#include <help.h>
 #include <linenoise.h>
 #include <lru.h>
 #include <prng.h>
@@ -29,7 +30,6 @@
   }
 
 #define MAP_EXIT "exit"
-#define MAP_HELP "help"
 
 // 命令自动完成
 void completion(const char *buf, linenoiseCompletions *lc);
@@ -57,6 +57,8 @@ void base64_encode_command(commands_t commands);
 bool lru_command(commands_t commands, int commands_length);
 bool hmap_command(commands_t commands, int commands_length);
 bool avl_command(commands_t commands, int commands_length);
+
+bool help_command(commands_t commands, int commands_length);
 
 #define COMMANDS_CHECK(x)                     \
   if (x) {                                    \
@@ -108,8 +110,8 @@ int main(int argc, char **argv) {
       free(line_copy);
 
       if (commands_length >= 1) {
-        if (strncasecmp(commands[0], MAP_HELP, strlen(MAP_HELP)) == 0) {
-          printf("%s\n", VERSION);
+        if (strncasecmp(commands[0], HELP_COMMAND, strlen(HELP_COMMAND)) == 0) {
+          COMMANDS_CHECK(!help_command(commands, commands_length));
         } else if (strncasecmp(commands[0], MAP_EXIT, strlen(MAP_EXIT)) == 0) {
           commands_free(commands, commands_length);
           return EXIT_SUCCESS;
@@ -136,14 +138,75 @@ int main(int argc, char **argv) {
         } else {
           printf("%s\n", ERR_COMMAND_NOT_FOUND);
         }
-      } else {
-        printf("%s\n", ERR_COMMAND);
       }
       commands_free(commands, commands_length);
     }
     free(line);
   }
   return EXIT_SUCCESS;
+}
+
+bool help_command(commands_t commands, int commands_length) {
+  printf("Hashmap\n");
+  printf("    \033[0;32mhmap\033[0m set <key> <value>\n");
+  printf("    \033[0;32mhmap\033[0m get <key>\n");
+  printf("    \033[0;32mhmap\033[0m del <key>\n");
+  printf("    \033[0;32mhmap\033[0m cap\n");
+  printf("    \033[0;32mhmap\033[0m len\n");
+  printf("    \033[0;32mhmap\033[0m print\n");
+  printf("LRU\n");
+  printf("    \033[0;32mlru\033[0m set <num> <value>\n");
+  printf("    \033[0;32mlru\033[0m get <num>\n");
+  printf("    \033[0;32mlru\033[0m cap set <num>\n");
+  printf("    \033[0;32mlru\033[0m cap get\n");
+  printf("    \033[0;32mlru\033[0m len\n");
+  printf("    \033[0;32mlru\033[0m print\n");
+  printf("AVL-Tree\n");
+  printf("    \033[0;32mavl\033[0m set <num>\n");
+  printf("    \033[0;32mavl\033[0m get <num>\n");
+  printf("    \033[0;32mavl\033[0m print <pre/in/post>\n");
+  printf("    \033[0;32mavl\033[0m dump <filename>\n");
+  printf("Base64\n");
+  printf("    \033[0;32mbase64\033[0m enc <string>\n");
+  printf("    \033[0;32mbase64\033[0m dec <string>\n");
+  printf("Base64url\n");
+  printf("    \033[0;32mbase64url\033[0m enc <string>\n");
+  printf("    \033[0;32mbase64url\033[0m dec <string>\n");
+  printf("Base32\n");
+  printf("    \033[0;32mbase32\033[0m enc <string>\n");
+  printf("    \033[0;32mbase32\033[0m dec <string>\n");
+  printf("Base16\n");
+  printf("    \033[0;32mbase16\033[0m enc <string>\n");
+  printf("    \033[0;32mbase16\033[0m dec <string>\n");
+  printf("Hash\n");
+  printf("    \033[1;33mSupport hash methods: ");
+  for (int i = 0; i < TAB_SIZE - 1; i++) {
+    if (i == 0) {
+      printf("%s", hash_descriptor[i].name);
+    } else {
+      if (i % 7 == 0) {
+        printf("\n   ");
+      }
+      printf(" %s", hash_descriptor[i].name);
+    }
+  }
+  printf("\033[0m\n");
+  printf("    \033[0;32mhash\033[0m <method> <string>\n");
+  printf("PRNG\n");
+  printf("    \033[1;33mSupport prng methods: ");
+  for (int i = 0; i < 6; i++) {
+    if (i == 0) {
+      printf("%s", prng_descriptor[i].name);
+    } else {
+      if (i % 7 == 0) {
+        printf("\n   ");
+      }
+      printf(" %s", prng_descriptor[i].name);
+    }
+  }
+  printf("\033[0m\n");
+  printf("    \033[0;32mprng\033[0m <method> <string> <length>\n");
+  return MAP_COMMANDS_OK;
 }
 
 bool base64_command(commands_t commands, int commands_length) {
@@ -220,6 +283,7 @@ bool avl_command(commands_t commands, int commands_length) {
   }
   return MAP_COMMANDS_OK;
 }
+
 bool hmap_command(commands_t commands, int commands_length) {
   command_length_check(<, 2);
   if (strncasecmp(commands[1], HMAP_COMMAND_CAP, strlen(HMAP_COMMAND_CAP)) == 0) {
