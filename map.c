@@ -54,18 +54,16 @@ int main(int argc, char **argv) {
   hmap = hashmap_create();
   lru = LRU_create();
   atexit(clear);
-  // ERR_INTERNAL1("sd");
-  // printf("[%s] %s:%d %s: %s\n", __DATE__, __FILE__, __LINE__, ERR_INTERNAL, "123");
-  // printf("%s %d\n", __FILE__, __LINE__, __DATE__);
+
   if (register_all_ciphers() != CRYPT_OK) {
-    ERR_INTERNAL1("register all ciphers with error.");
-    // printf("[%s] %s:%d %s\n", ERR_INTERNAL, __LINE__);
+    ERR_INTERNAL("register all ciphers with error");
   }
   if (register_all_hashes() != CRYPT_OK) {
-    ERR_INTERNAL1("register all hashes with error.");
+    ERR_INTERNAL("register all hashes with error");
   }
-  register_all_prngs();
-  // printf("60: %d\n", find_hash("md5"));
+  if (register_all_prngs() != CRYPT_OK) {
+    ERR_INTERNAL("register all prngs with error");
+  }
 
   char *line;
   while ((line = linenoise("map> ")) != NULL) {
@@ -187,7 +185,7 @@ int main(int argc, char **argv) {
             unsigned long out = 4 * ((strlen(string) + 2) / 3);
             char *outstring = (char *)calloc(out, sizeof(char));
             if (base64_encode((unsigned char *)string, strlen(string), outstring, &out) != CRYPT_OK) {
-              printf("%s\n", ERR_INTERNAL);
+              ERR_INTERNAL("base64 encode with error");
             } else {
               printf("%s\n", outstring);
             }
@@ -196,7 +194,7 @@ int main(int argc, char **argv) {
             unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
             unsigned long out = sizeof(outstring);
             if (base64_decode(string, strlen(string) + 1, outstring, &out)) {
-              printf("%s\n", ERR_INTERNAL);
+              ERR_INTERNAL("base64 decode with error");
             } else {
               printf("%s\n", outstring);
             }
@@ -210,7 +208,7 @@ int main(int argc, char **argv) {
             unsigned long out = 4 * ((strlen(string) + 2) / 3);
             char *outstring = (char *)calloc(out, sizeof(char));
             if (base64url_encode((unsigned char *)string, strlen(string), outstring, &out) != CRYPT_OK) {
-              printf("%s\n", ERR_INTERNAL);
+              ERR_INTERNAL("base64 url encode with error");
             } else {
               printf("%s\n", outstring);
             }
@@ -220,7 +218,7 @@ int main(int argc, char **argv) {
             unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
             unsigned long out = sizeof(outstring);
             if (base64url_decode(string, strlen(string), outstring, &out)) {
-              printf("%s\n", ERR_INTERNAL);
+              ERR_INTERNAL("base64 url decode with error");
             } else {
               printf("%s\n", outstring);
             }
@@ -235,7 +233,7 @@ int main(int argc, char **argv) {
             unsigned long out = (8 * strlen(string) + 4) / 5 + 1;
             char *outstring = (char *)calloc(out, sizeof(char));
             if (base32_encode((unsigned char *)string, strlen(string), outstring, &out, BASE32_RFC4648) != CRYPT_OK) {
-              printf("%s\n", ERR_INTERNAL);
+              ERR_INTERNAL("base32 encode with error");
             } else {
               printf("%s\n", outstring);
             }
@@ -245,7 +243,7 @@ int main(int argc, char **argv) {
             unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
             unsigned long out = sizeof(outstring);
             if (base32_decode(string, strlen(string), outstring, &out, BASE32_RFC4648) != CRYPT_OK) {
-              printf("%s\n", ERR_INTERNAL);
+              ERR_INTERNAL("base32 decode with error");
             } else {
               printf("%s\n", outstring);
             }
@@ -260,7 +258,7 @@ int main(int argc, char **argv) {
             unsigned long out = strlen(string) * 2 + 1;
             char *outstring = (char *)calloc(out, sizeof(char));
             if (base16_encode((unsigned char *)string, strlen(string), outstring, &out, 0) != CRYPT_OK) {
-              printf("%s\n", ERR_INTERNAL);
+              ERR_INTERNAL("base16 encode with error");
             } else {
               printf("%s\n", outstring);
             }
@@ -270,7 +268,7 @@ int main(int argc, char **argv) {
             unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
             unsigned long out = sizeof(outstring);
             if (base16_decode(string, strlen(string), outstring, &out) != CRYPT_OK) {
-              printf("%s\n", ERR_INTERNAL);
+              ERR_INTERNAL("base16 decode with error");
             } else {
               printf("%s\n", outstring);
             }
@@ -288,22 +286,22 @@ int main(int argc, char **argv) {
             printf("cannot find hash method\n");
           }
           if (hash_descriptor[hash_index].init(context) != CRYPT_OK) {
-            printf("%s\n", ERR_INTERNAL);
+            ERR_INTERNAL("hash init with error");
             goto hashflag;
           }
           if (hash_descriptor[hash_index].process(context, (unsigned char *)string, strlen(string)) != CRYPT_OK) {
-            printf("%s\n", ERR_INTERNAL);
+            ERR_INTERNAL("hash process with error");
             goto hashflag;
           }
           unsigned char *outbyte = (unsigned char *)calloc(hash_descriptor[hash_index].hashsize, sizeof(unsigned char));
           if (hash_descriptor[hash_index].done(context, outbyte) != CRYPT_OK) {
-            printf("%s\n", ERR_INTERNAL);
+            ERR_INTERNAL("hash done with error");
             goto hashflag;
           }
           unsigned long out = hash_descriptor[hash_index].hashsize * 2 + 1;
           char *outstring = (char *)calloc(out, sizeof(char));
           if (base16_encode(outbyte, hash_descriptor[hash_index].hashsize, outstring, &out, 0) != CRYPT_OK) {
-            printf("%s\n", ERR_INTERNAL);
+            ERR_INTERNAL("hash base16 encode with error");
           } else {
             printf("%s\n", outstring);
           }
