@@ -39,6 +39,12 @@ char *hints(const char *buf, int *color, int *bold);
 
 bool prng_command(commands_t commands, int commands_length);
 bool hash_command(commands_t commands, int commands_length);
+
+bool base64_command(commands_t commands, int commands_length);
+bool base64url_command(commands_t commands, int commands_length);
+bool base32_command(commands_t commands, int commands_length);
+bool base16_command(commands_t commands, int commands_length);
+
 void base16_encode_command(commands_t commands);
 void base16_decode_command(commands_t commands);
 void base32_encode_command(commands_t commands);
@@ -97,10 +103,8 @@ int main(int argc, char **argv) {
 
       char *line_copy = (char *)malloc(sizeof(char) * (strlen(line) + 1));
       memcpy(line_copy, line, strlen(line) + 1);
-
       int commands_length;
-      commands_t commands = commands_parse(line, &commands_length);
-
+      commands_t commands = commands_parse(line_copy, &commands_length);
       free(line_copy);
 
       if (commands_length >= 1) {
@@ -118,41 +122,13 @@ int main(int argc, char **argv) {
         } else if (strncasecmp(commands[0], AVL_COMMAND, strlen(AVL_COMMAND)) == 0) {
           COMMANDS_CHECK(!avl_command(commands, commands_length));
         } else if (strncasecmp(commands[0], BASE64_COMMAND, strlen(BASE64_COMMAND)) == 0) {
-          command_length_check(!=, 3);
-          if (strncasecmp(commands[1], BASE64_COMMAND_ENCODE, strlen(BASE64_COMMAND_ENCODE)) == 0) {
-            base64_encode_command(commands);
-          } else if (strncasecmp(commands[1], BASE64_COMMAND_DECODE, strlen(BASE64_COMMAND_DECODE)) == 0) {
-            base64_decode_command(commands);
-          } else {
-            printf("%s\n", ERR_COMMAND_NOT_FOUND);
-          }
+          COMMANDS_CHECK(!base64_command(commands, commands_length));
         } else if (strncasecmp(commands[0], BASE64URL_COMMAND, strlen(BASE64URL_COMMAND)) == 0) {
-          command_length_check(!=, 3);
-          if (strncasecmp(commands[1], BASE64URL_COMMAND_ENCODE, strlen(BASE64URL_COMMAND_ENCODE)) == 0) {
-            base64url_encode_command(commands);
-          } else if (strncasecmp(commands[1], BASE64URL_COMMAND_DECODE, strlen(BASE64URL_COMMAND_DECODE)) == 0) {
-            base64url_decode_command(commands);
-          } else {
-            printf("%s\n", ERR_COMMAND_NOT_FOUND);
-          }
+          COMMANDS_CHECK(!base64url_command(commands, commands_length));
         } else if (strncasecmp(commands[0], BASE32_COMMAND, strlen(BASE32_COMMAND)) == 0) {
-          command_length_check(!=, 3);
-          if (strncasecmp(commands[1], BASE32_COMMAND_ENCODE, strlen(BASE32_COMMAND_ENCODE)) == 0) {
-            base32_encode_command(commands);
-          } else if (strncasecmp(commands[1], BASE32_COMMAND_DECODE, strlen(BASE32_COMMAND_DECODE)) == 0) {
-            base32_decode_command(commands);
-          } else {
-            printf("%s\n", ERR_COMMAND_NOT_FOUND);
-          }
+          COMMANDS_CHECK(!base32_command(commands, commands_length));
         } else if (strncasecmp(commands[0], BASE16_COMMAND, strlen(BASE16_COMMAND)) == 0) {
-          command_length_check(!=, 3);
-          if (strncasecmp(commands[1], BASE16_COMMAND_ENCODE, strlen(BASE16_COMMAND_ENCODE)) == 0) {
-            base16_encode_command(commands);
-          } else if (strncasecmp(commands[1], BASE16_COMMAND_DECODE, strlen(BASE16_COMMAND_DECODE)) == 0) {
-            base16_decode_command(commands);
-          } else {
-            printf("%s\n", ERR_COMMAND_NOT_FOUND);
-          }
+          COMMANDS_CHECK(!base16_command(commands, commands_length));
         } else if (strncasecmp(commands[0], HASH_COMMAND, strlen(HASH_COMMAND)) == 0) {
           COMMANDS_CHECK(!hash_command(commands, commands_length));
         } else if (strncasecmp(commands[0], PRNG_COMMAND, strlen(PRNG_COMMAND)) == 0) {
@@ -168,6 +144,54 @@ int main(int argc, char **argv) {
     free(line);
   }
   return EXIT_SUCCESS;
+}
+
+bool base64_command(commands_t commands, int commands_length) {
+  command_length_check(!=, 3);
+  if (strncasecmp(commands[1], BASE64_COMMAND_ENCODE, strlen(BASE64_COMMAND_ENCODE)) == 0) {
+    base64_encode_command(commands);
+  } else if (strncasecmp(commands[1], BASE64_COMMAND_DECODE, strlen(BASE64_COMMAND_DECODE)) == 0) {
+    base64_decode_command(commands);
+  } else {
+    printf("%s\n", ERR_COMMAND_NOT_FOUND);
+  }
+  return MAP_COMMANDS_OK;
+}
+
+bool base64url_command(commands_t commands, int commands_length) {
+  command_length_check(!=, 3);
+  if (strncasecmp(commands[1], BASE64URL_COMMAND_ENCODE, strlen(BASE64URL_COMMAND_ENCODE)) == 0) {
+    base64url_encode_command(commands);
+  } else if (strncasecmp(commands[1], BASE64URL_COMMAND_DECODE, strlen(BASE64URL_COMMAND_DECODE)) == 0) {
+    base64url_decode_command(commands);
+  } else {
+    printf("%s\n", ERR_COMMAND_NOT_FOUND);
+  }
+  return MAP_COMMANDS_OK;
+}
+
+bool base32_command(commands_t commands, int commands_length) {
+  command_length_check(!=, 3);
+  if (strncasecmp(commands[1], BASE32_COMMAND_ENCODE, strlen(BASE32_COMMAND_ENCODE)) == 0) {
+    base32_encode_command(commands);
+  } else if (strncasecmp(commands[1], BASE32_COMMAND_DECODE, strlen(BASE32_COMMAND_DECODE)) == 0) {
+    base32_decode_command(commands);
+  } else {
+    printf("%s\n", ERR_COMMAND_NOT_FOUND);
+  }
+  return MAP_COMMANDS_OK;
+}
+
+bool base16_command(commands_t commands, int commands_length) {
+  command_length_check(!=, 3);
+  if (strncasecmp(commands[1], BASE16_COMMAND_ENCODE, strlen(BASE16_COMMAND_ENCODE)) == 0) {
+    base16_encode_command(commands);
+  } else if (strncasecmp(commands[1], BASE16_COMMAND_DECODE, strlen(BASE16_COMMAND_DECODE)) == 0) {
+    base16_decode_command(commands);
+  } else {
+    printf("%s\n", ERR_COMMAND_NOT_FOUND);
+  }
+  return MAP_COMMANDS_OK;
 }
 
 bool avl_command(commands_t commands, int commands_length) {
@@ -257,7 +281,7 @@ bool lru_command(commands_t commands, int commands_length) {
     } else if (strncasecmp(commands[2], LRU_COMMAND_SET, strlen(LRU_COMMAND_SET)) == 0) {
       int cap = atoi(commands[3]);
       if (cap < lru->cap) {
-        printf("please set more bigger cap");
+        printf("please set more bigger cap\n");
       } else {
         lru->cap = cap;
       }
@@ -280,6 +304,7 @@ void base64url_encode_command(commands_t commands) {
   }
   free(outstring);
 }
+
 void base64url_decode_command(commands_t commands) {
   char *string = commands[2];
   unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
@@ -291,6 +316,7 @@ void base64url_decode_command(commands_t commands) {
   }
   free(outstring);
 }
+
 void base64_decode_command(commands_t commands) {
   char *string = commands[2];
   unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
@@ -301,9 +327,10 @@ void base64_decode_command(commands_t commands) {
     printf("%s\n", outstring);
   }
 }
+
 void base64_encode_command(commands_t commands) {
   char *string = commands[2];
-  unsigned long out = 4 * ((strlen(string) + 2) / 3);
+  unsigned long out = 4 * ((strlen(string) + 2) / 3) + 1;
   char *outstring = (char *)calloc(out, sizeof(char));
   if (base64_encode((unsigned char *)string, strlen(string), outstring, &out) != CRYPT_OK) {
     map_err(ERR_INTERNAL, "base64 encode with error");
