@@ -13,7 +13,7 @@ all: deps map upx
 .PHONY: upx
 upx:
 ifneq ($(shell uname),Darwin)
-	upx -9 map
+	upx --best map
 endif
 
 map: $(objects)
