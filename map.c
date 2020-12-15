@@ -16,6 +16,7 @@
 #include <hashmap.h>
 #include <linenoise.h>
 #include <lru.h>
+#include <prng.h>
 #include <version.h>
 
 #define command_length_check(x, y)            \
@@ -280,23 +281,20 @@ int main(int argc, char **argv) {
           command_length_check(!=, 3);
           char *hash_name = commands[1];
           char *string = commands[2];
-          hash_state *context = (hash_state *)malloc(sizeof(hash_state));
+          hash_state context;
           int hash_index = find_hash(hash_name);
           if (hash_index < 0) {
             printf("cannot find hash method\n");
           }
-          if (hash_descriptor[hash_index].init(context) != CRYPT_OK) {
+          if (hash_descriptor[hash_index].init(&context) != CRYPT_OK) {
             ERR_INTERNAL("hash init with error");
-            goto hashflag;
           }
-          if (hash_descriptor[hash_index].process(context, (unsigned char *)string, strlen(string)) != CRYPT_OK) {
+          if (hash_descriptor[hash_index].process(&context, (unsigned char *)string, strlen(string)) != CRYPT_OK) {
             ERR_INTERNAL("hash process with error");
-            goto hashflag;
           }
           unsigned char *outbyte = (unsigned char *)calloc(hash_descriptor[hash_index].hashsize, sizeof(unsigned char));
-          if (hash_descriptor[hash_index].done(context, outbyte) != CRYPT_OK) {
+          if (hash_descriptor[hash_index].done(&context, outbyte) != CRYPT_OK) {
             ERR_INTERNAL("hash done with error");
-            goto hashflag;
           }
           unsigned long out = hash_descriptor[hash_index].hashsize * 2 + 1;
           char *outstring = (char *)calloc(out, sizeof(char));
@@ -306,8 +304,40 @@ int main(int argc, char **argv) {
             printf("%s\n", outstring);
           }
           free(outstring);
-        hashflag:
-          free(context);
+        } else if (strncmp(commands[0], PRNG_COMMAND, strlen(PRNG_COMMAND)) == 0) {
+          command_length_check(!=, 4);
+          char *hash_name = commands[1];
+          char *entropy = commands[2];
+          int length = atoi(commands[3]);
+          if (length <= 0) {
+            printf("length is invalid\n");
+          }
+          prng_state context;
+          int prng_index = find_prng(hash_name);
+          if (prng_index < 0) {
+            printf("cannot find prng method\n");
+          }
+          if (prng_descriptor[prng_index].start(&context) != CRYPT_OK) {
+            ERR_INTERNAL("prng start with error");
+          }
+          if (prng_descriptor[prng_index].add_entropy((unsigned char *)entropy, strlen(entropy), &context) != CRYPT_OK) {
+            ERR_INTERNAL("prng add entropy with error");
+          }
+          if (chacha20_prng_ready(&context) != CRYPT_OK) {
+            ERR_INTERNAL("prng ready with error");
+          }
+          unsigned char *outbyte = (unsigned char *)calloc(length, sizeof(unsigned char));
+          if (chacha20_prng_read(outbyte, length, &context) != length) {
+            ERR_INTERNAL("prng read with error");
+          }
+          unsigned long out = length * 2 + 1;
+          char *outstring = (char *)calloc(out, sizeof(char));
+          if (base16_encode(outbyte, length, outstring, &out, 0) != CRYPT_OK) {
+            ERR_INTERNAL("prng base16 encode with error");
+          } else {
+            printf("%s\n", outstring);
+          }
+          free(outstring);
         } else {
           printf("%s\n", ERR_COMMAND_NOT_FOUND);
         }
