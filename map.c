@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <time.h>
 
 #include <tomcrypt.h>
@@ -486,21 +487,37 @@ bool hash_command(commands_t commands, int commands_length) {
   command_length_check(!=, 3);
   char *hash_name = commands[1];
   char *string = commands[2];
-  hash_state context;
+
   int hash_index = find_hash(hash_name);
   if (hash_index < 0) {
     printf("cannot find hash method\n");
   }
-  if (hash_descriptor[hash_index].init(&context) != CRYPT_OK) {
-    map_err(ERR_INTERNAL, "hash init with error");
-  }
-  if (hash_descriptor[hash_index].process(&context, (unsigned char *)string, strlen(string)) != CRYPT_OK) {
-    map_err(ERR_INTERNAL, "hash process with error");
-  }
+
   unsigned char *outbyte = (unsigned char *)calloc(hash_descriptor[hash_index].hashsize, sizeof(unsigned char));
-  if (hash_descriptor[hash_index].done(&context, outbyte) != CRYPT_OK) {
-    map_err(ERR_INTERNAL, "hash done with error");
+
+  struct stat file_handler;
+  if (stat(string, &file_handler) == 0) {
+    unsigned long out = hash_descriptor[hash_index].hashsize;
+    if (hash_file(hash_index, string, outbyte, &out) != CRYPT_OK) {
+      map_err(ERR_INTERNAL, "hash file with error");
+      goto hash_command_flag;
+    }
+  } else {
+    hash_state context;
+    if (hash_descriptor[hash_index].init(&context) != CRYPT_OK) {
+      map_err(ERR_INTERNAL, "hash init with error");
+      goto hash_command_flag;
+    }
+    if (hash_descriptor[hash_index].process(&context, (unsigned char *)string, strlen(string)) != CRYPT_OK) {
+      map_err(ERR_INTERNAL, "hash process with error");
+      goto hash_command_flag;
+    }
+    if (hash_descriptor[hash_index].done(&context, outbyte) != CRYPT_OK) {
+      map_err(ERR_INTERNAL, "hash done with error");
+      goto hash_command_flag;
+    }
   }
+
   unsigned long out = hash_descriptor[hash_index].hashsize * 2 + 1;
   char *outstring = (char *)calloc(out, sizeof(char));
   if (base16_encode(outbyte, hash_descriptor[hash_index].hashsize, outstring, &out, 0) != CRYPT_OK) {
@@ -509,6 +526,8 @@ bool hash_command(commands_t commands, int commands_length) {
     printf("%s\n", outstring);
   }
   free(outstring);
+hash_command_flag:
+  free(outbyte);
   return MAP_COMMANDS_OK;
 }
 
