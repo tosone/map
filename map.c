@@ -4,12 +4,14 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <unistd.h>
 
 #include <tomcrypt.h>
 
 #include <avl.h>
 #include <command.h>
 #include <hashmap.h>
+#include <kilo.h>
 #include <linenoise.h>
 #include <lru.h>
 
@@ -35,6 +37,8 @@
 #define BASE16_COMMAND "base16"
 #define BASE16_COMMAND_DECODE "dec"
 #define BASE16_COMMAND_ENCODE "enc"
+
+#define VI_COMMAND "vi"
 
 #define ERR_COMMAND "invalid command"
 #define ERR_COMMAND_NOT_FOUND "command not found"
@@ -92,6 +96,8 @@ bool hmap_command(commands_t commands, int commands_length);
 bool avl_command(commands_t commands, int commands_length);
 
 bool help_command(commands_t commands, int commands_length);
+
+bool vi_command(commands_t commands, int commands_length);
 
 #define COMMANDS_CHECK(x)                     \
   if (x) {                                    \
@@ -168,6 +174,8 @@ int main(int argc, char **argv) {
           COMMANDS_CHECK(!hash_command(commands, commands_length));
         } else if (strncasecmp(commands[0], PRNG_COMMAND, strlen(PRNG_COMMAND)) == 0) {
           COMMANDS_CHECK(!prng_command(commands, commands_length));
+        } else if (strncasecmp(commands[0], VI_COMMAND, strlen(VI_COMMAND)) == 0) {
+          COMMANDS_CHECK(!vi_command(commands, commands_length));
         } else {
           printf("%s\n", ERR_COMMAND_NOT_FOUND);
         }
@@ -177,6 +185,24 @@ int main(int argc, char **argv) {
     free(line);
   }
   return EXIT_SUCCESS;
+}
+
+bool vi_command(commands_t commands, int commands_length) {
+  command_length_check(!=, 2);
+  initEditor();
+  editorSelectSyntaxHighlight(commands[1]);
+  editorOpen(commands[1]);
+  enableRawMode(STDIN_FILENO);
+  editorSetStatusMessage("HELP: Ctrl-S = save | Ctrl-Q = quit | Ctrl-F = find");
+  while (1) {
+    editorRefreshScreen();
+    if (!editorProcessKeypress(STDIN_FILENO)) {
+      disableRawMode(STDIN_FILENO);
+      linenoiseClearScreen();
+      break;
+    }
+  }
+  return MAP_COMMANDS_OK;
 }
 
 bool help_command(commands_t commands, int commands_length) {
@@ -239,6 +265,8 @@ bool help_command(commands_t commands, int commands_length) {
   }
   printf("\033[0m\n");
   printf("    \033[0;32mprng\033[0m <method> <string> <length>\n");
+  printf("Vim\n");
+  printf("    \033[0;32mvi\033[0m <filename>\n");
   return MAP_COMMANDS_OK;
 }
 
