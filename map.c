@@ -14,6 +14,7 @@
 #include <kilo.h>
 #include <linenoise.h>
 #include <lru.h>
+#include <tcp.h>
 
 #define VERSION "v1.0.0"
 
@@ -99,6 +100,8 @@ bool help_command(commands_t commands, int commands_length);
 
 bool vi_command(commands_t commands, int commands_length);
 
+bool tcp_command(commands_t commands, int commands_length);
+
 #define COMMANDS_CHECK(x)                     \
   if (x) {                                    \
     commands_free(commands, commands_length); \
@@ -176,6 +179,8 @@ int main(int argc, char **argv) {
           COMMANDS_CHECK(!prng_command(commands, commands_length));
         } else if (strncasecmp(commands[0], VI_COMMAND, strlen(VI_COMMAND)) == 0) {
           COMMANDS_CHECK(!vi_command(commands, commands_length));
+        } else if (strncasecmp(commands[0], TCP_COMMAND, strlen(TCP_COMMAND)) == 0) {
+          COMMANDS_CHECK(!tcp_command(commands, commands_length));
         } else {
           printf("%s\n", ERR_COMMAND_NOT_FOUND);
         }
@@ -185,6 +190,17 @@ int main(int argc, char **argv) {
     free(line);
   }
   return EXIT_SUCCESS;
+}
+
+bool tcp_command(commands_t commands, int commands_length) {
+  command_length_check(!=, 3);
+  int port = atoi(commands[2]);
+  if (port <= 0) {
+    printf("port is invalid\n");
+    return MAP_COMMANDS_OK;
+  }
+  tcp_check(commands[1], port);
+  return MAP_COMMANDS_OK;
 }
 
 bool vi_command(commands_t commands, int commands_length) {
@@ -265,8 +281,10 @@ bool help_command(commands_t commands, int commands_length) {
   }
   printf("\033[0m\n");
   printf("    \033[0;32mprng\033[0m <method> <string> <length>\n");
-  printf("Vim\n");
+  printf("Editor\n");
   printf("    \033[0;32mvi\033[0m <filename>\n");
+  printf("Network\n");
+  printf("    \033[0;32mtcp\033[0m <hostname> <port>\n");
   return MAP_COMMANDS_OK;
 }
 
