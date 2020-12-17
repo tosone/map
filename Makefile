@@ -27,7 +27,7 @@ map: $(objects)
 	$(CC) -c $(CFLAGS) $<
 
 .PHONY: deps
-deps: linenoise murmurhash libtomcrypt mongoose
+deps: linenoise murmurhash libtomcrypt mongoose mbedtls
 
 .PHONY: linenoise
 linenoise:
@@ -45,10 +45,15 @@ libtomcrypt:
 mongoose:
 	cd deps/$@ && $(MAKE)
 
+.PHONY: mbedtls
+mbedtls:
+	cd deps/$@ && $(MAKE) programs
+
 .PHONY: clean
 clean:
 	-(cd deps/linenoise && $(MAKE) clean) > /dev/null || true
 	-(cd deps/murmurhash && $(MAKE) clean) > /dev/null || true
 	-(cd deps/libtomcrypt && $(MAKE) clean) > /dev/null || true
 	-(cd deps/mongoose && $(MAKE) clean) > /dev/null || true
+	-(cd deps/mbedtls && $(MAKE) clean) > /dev/null || true
 	-($(RM) map *.o)
