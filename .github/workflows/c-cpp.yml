@@ -15,4 +15,4 @@ jobs:
       - name: install packages
         run: sudo apt-get -y -qq install musl-tools upx
       - name: make
-        run: CC=musl-gcc make
+        run: make
