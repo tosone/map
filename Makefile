@@ -1,9 +1,10 @@
 CFLAGS  += -Os -Wall -I./deps/linenoise -I./deps/murmurhash \
-	-I./deps/mongoose -I./deps/kilo \
+	-I./deps/mongoose -I./deps/kilo -I./deps/mbedtls/include \
 	-I./deps/libtomcrypt/src/headers -I.
 LDFLAGS += ./deps/linenoise/linenoise.o ./deps/murmurhash/murmurhash.o \
 	./deps/mongoose/mongoose.o ./deps/kilo/kilo.o \
-	-L./deps/libtomcrypt -ltomcrypt -lm -pthread
+	-L./deps/libtomcrypt -L./deps/mbedtls/library -ltomcrypt -lmbedtls \
+	-lmbedcrypto -lmbedx509 -lm -pthread
 
 objects := $(patsubst %.c,%.o,$(wildcard *.c))
 
