@@ -7,6 +7,7 @@
 
 #include <sys/stat.h>
 
+#include <mongoose.h>
 #include <tomcrypt.h>
 
 #include <command.h>
@@ -89,6 +90,13 @@ void clear() {
   printf("clear all, bye\n");
 }
 
+static const char *s_web_root_dir = "./";
+static const char *s_listening_address = "http://localhost:8000";
+
+static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
+  if (ev == MG_EV_HTTP_MSG) mg_http_serve_dir(c, ev_data, s_web_root_dir);
+}
+
 int main(int argc, char **argv) {
   linenoiseSetCompletionCallback(completion);
   linenoiseSetHintsCallback(hints);
@@ -137,6 +145,12 @@ int main(int argc, char **argv) {
           COMMANDS_CHECK(!vi_command(commands, commands_length));
         } else if (strncasecmp(commands[0], TCP_COMMAND, strlen(TCP_COMMAND)) == 0) {
           COMMANDS_CHECK(!tcp_command(commands, commands_length));
+        } else if (strncasecmp(commands[0], "server", strlen("server")) == 0) {
+          struct mg_mgr mgr;
+          mg_mgr_init(&mgr);
+          mg_http_listen(&mgr, s_listening_address, cb, &mgr);
+          for (;;) mg_mgr_poll(&mgr, 1000);
+          mg_mgr_free(&mgr);
         } else {
           printf("%s\n", ERR_COMMAND_NOT_FOUND);
         }
