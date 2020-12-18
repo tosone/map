@@ -1,8 +1,8 @@
 CFLAGS  += -Os -Wall -I./deps/linenoise -I./deps/murmurhash \
-	-I./deps/mongoose \
+	-I./deps/mongoose -I./deps/kilo \
 	-I./deps/libtomcrypt/src/headers -I.
 LDFLAGS += ./deps/linenoise/linenoise.o ./deps/murmurhash/murmurhash.o \
-	./deps/mongoose/mongoose.o \
+	./deps/mongoose/mongoose.o ./deps/kilo/kilo.o \
 	-L./deps/libtomcrypt -ltomcrypt -lm -pthread
 
 objects := $(patsubst %.c,%.o,$(wildcard *.c))
@@ -17,7 +17,7 @@ map: $(objects)
 	$(CC) -c $(CFLAGS) $<
 
 .PHONY: deps
-deps: linenoise murmurhash libtomcrypt mongoose mbedtls
+deps: linenoise murmurhash libtomcrypt mongoose mbedtls kilo
 
 .PHONY: linenoise
 linenoise:
@@ -39,6 +39,10 @@ mongoose:
 mbedtls:
 	cd deps/$@ && $(MAKE) programs
 
+.PHONY: kilo
+kilo:
+	cd deps/$@ && $(MAKE)
+
 .PHONY: clean
 clean:
 	-(cd deps/linenoise && $(MAKE) clean) > /dev/null || true
@@ -46,4 +50,5 @@ clean:
 	-(cd deps/libtomcrypt && $(MAKE) clean) > /dev/null || true
 	-(cd deps/mongoose && $(MAKE) clean) > /dev/null || true
 	-(cd deps/mbedtls && $(MAKE) clean) > /dev/null || true
+	-(cd deps/kilo && $(MAKE) clean) > /dev/null || true
 	-($(RM) map *.o)
