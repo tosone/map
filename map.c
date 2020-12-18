@@ -1,3 +1,4 @@
+#include <pthread.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,6 +30,10 @@
 #define BASE_COMMAND_ENCODE "enc"
 
 #define VI_COMMAND "vi"
+
+#define SERVER_COMMAND "server"
+#define SERVER_COMMAND_START "start"
+#define SERVER_COMMAND_STOP "stop"
 
 #define ERR_COMMAND "invalid command"
 #define ERR_COMMAND_NOT_FOUND "command not found"
@@ -82,21 +87,58 @@ bool vi_command(commands_t commands, int commands_length);
 
 bool tcp_command(commands_t commands, int commands_length);
 
+bool server_command(commands_t commands, int commands_length);
+
 #define COMMANDS_CHECK(x)                     \
   if (x) {                                    \
     commands_free(commands, commands_length); \
     continue;                                 \
   }
 
-void clear() {
-  printf("clear all, bye\n");
+struct server_dir_t {
+  char *dir;
+  int port;
+};
+
+struct server_dir_t *serve_dir_params;
+bool serve_dir_status = false;
+char *serve_dir_root = NULL;
+
+static void serve_dir_cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
+  if (ev == MG_EV_HTTP_MSG) mg_http_serve_dir(c, ev_data, serve_dir_root);
 }
 
-static const char *s_web_root_dir = "./";
-static const char *s_listening_address = "http://localhost:8000";
+void *serve_dir(void *params) {
+  struct server_dir_t *_params = (struct server_dir_t *)params;
+  struct mg_mgr mgr;
+  mg_mgr_init(&mgr);
+  char address[50] = {0};
+  sprintf(address, "http://0.0.0.0:%d", _params->port);
+  serve_dir_root = _params->dir;
+  mg_http_listen(&mgr, address, serve_dir_cb, &mgr);
+  while (true) {
+    mg_mgr_poll(&mgr, 1000);
+    if (!serve_dir_status) {
+      break;
+    }
+  }
+  mg_mgr_free(&mgr);
+  pthread_exit(NULL);
+  return NULL;
+}
 
-static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
-  if (ev == MG_EV_HTTP_MSG) mg_http_serve_dir(c, ev_data, s_web_root_dir);
+void clear() {
+  if (serve_dir_status) {
+    serve_dir_status = false;
+    mg_usleep(2 * 1e6);
+  }
+  if (serve_dir_root != NULL) {
+    free(serve_dir_root);
+  }
+  if (serve_dir_params != NULL) {
+    free(serve_dir_params);
+  }
+  printf("clear all, bye\n");
 }
 
 int main(int argc, char **argv) {
@@ -149,12 +191,8 @@ int main(int argc, char **argv) {
           COMMANDS_CHECK(!vi_command(commands, commands_length));
         } else if (strncasecmp(commands[0], TCP_COMMAND, strlen(TCP_COMMAND)) == 0) {
           COMMANDS_CHECK(!tcp_command(commands, commands_length));
-        } else if (strncasecmp(commands[0], "server", strlen("server")) == 0) {
-          struct mg_mgr mgr;
-          mg_mgr_init(&mgr);
-          mg_http_listen(&mgr, s_listening_address, cb, &mgr);
-          for (;;) mg_mgr_poll(&mgr, 1000);
-          mg_mgr_free(&mgr);
+        } else if (strncasecmp(commands[0], SERVER_COMMAND, strlen(SERVER_COMMAND)) == 0) {
+          COMMANDS_CHECK(!server_command(commands, commands_length));
         } else {
           printf("%s\n", ERR_COMMAND_NOT_FOUND);
         }
@@ -164,6 +202,39 @@ int main(int argc, char **argv) {
     free(line);
   }
   return EXIT_SUCCESS;
+}
+
+bool server_command(commands_t commands, int commands_length) {
+  command_length_check(<, 2);
+  if (strncasecmp(commands[1], SERVER_COMMAND_START, strlen(SERVER_COMMAND_START)) == 0) {
+    if (serve_dir_status) {
+      printf("server started already\n");
+      return MAP_COMMANDS_OK;
+    }
+    command_length_check(<, 3);
+    int port = 8000;
+    if (commands_length == 4) {
+      port = atoi(commands[3]);
+    }
+    if (port == 0) {
+      port = 8000;
+    }
+    serve_dir_status = true;
+    pthread_t tid;
+    serve_dir_params = (struct server_dir_t *)malloc(sizeof(struct server_dir_t));
+    serve_dir_params->dir = strdup(commands[2]);
+    serve_dir_params->port = port;
+    pthread_create(&tid, NULL, serve_dir, (void *)serve_dir_params);
+  } else if (strncasecmp(commands[1], SERVER_COMMAND_STOP, strlen(SERVER_COMMAND_STOP)) == 0) {
+    if (!serve_dir_status) {
+      printf("server stopped already\n");
+      return MAP_COMMANDS_OK;
+    }
+    free(serve_dir_root);
+    free(serve_dir_params);
+    serve_dir_status = false;
+  }
+  return MAP_COMMANDS_OK;
 }
 
 bool tcp_command(commands_t commands, int commands_length) {
