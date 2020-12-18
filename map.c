@@ -22,7 +22,9 @@
 #define PRNG_COMMAND "prng"
 #define HASH_COMMAND "hash"
 
-#define BASE_COMMAND "base"
+#define BASE64_COMMAND "base64"
+#define BASE32_COMMAND "base32"
+#define BASE16_COMMAND "base16"
 #define BASE_COMMAND_DECODE "dec"
 #define BASE_COMMAND_ENCODE "enc"
 
@@ -135,7 +137,9 @@ int main(int argc, char **argv) {
           return EXIT_SUCCESS;
         } else if (strncasecmp(commands[0], VERSION_COMMAND, strlen(VERSION_COMMAND)) == 0) {
           printf("%s\n", VERSION);
-        } else if (strncasecmp(commands[0], BASE_COMMAND, strlen(BASE_COMMAND)) == 0) {
+        } else if (strncasecmp(commands[0], BASE64_COMMAND, strlen(BASE64_COMMAND)) == 0 ||
+                   strncasecmp(commands[0], BASE32_COMMAND, strlen(BASE32_COMMAND)) == 0 ||
+                   strncasecmp(commands[0], BASE16_COMMAND, strlen(BASE16_COMMAND)) == 0) {
           COMMANDS_CHECK(!base_command(commands, commands_length));
         } else if (strncasecmp(commands[0], HASH_COMMAND, strlen(HASH_COMMAND)) == 0) {
           COMMANDS_CHECK(!hash_command(commands, commands_length));
@@ -192,20 +196,20 @@ bool vi_command(commands_t commands, int commands_length) {
 }
 
 bool base_command(commands_t commands, int commands_length) {
-  command_length_check(!=, 4);
-  int basex = atoi(commands[1]);
+  command_length_check(!=, 3);
+  int basex = atoi(commands[0] + 4);
   if (basex == 64) {
-    if (strncasecmp(commands[2], BASE_COMMAND_ENCODE, strlen(BASE_COMMAND_ENCODE)) == 0) {
+    if (strncasecmp(commands[1], BASE_COMMAND_ENCODE, strlen(BASE_COMMAND_ENCODE)) == 0) {
       base64_encode_command(commands);
-    } else if (strncasecmp(commands[2], BASE_COMMAND_DECODE, strlen(BASE_COMMAND_DECODE)) == 0) {
+    } else if (strncasecmp(commands[1], BASE_COMMAND_DECODE, strlen(BASE_COMMAND_DECODE)) == 0) {
       base64_decode_command(commands);
     } else {
       printf("%s\n", ERR_COMMAND_NOT_FOUND);
     }
   } else if (basex == 32) {
-    if (strncasecmp(commands[2], BASE_COMMAND_ENCODE, strlen(BASE_COMMAND_ENCODE)) == 0) {
+    if (strncasecmp(commands[1], BASE_COMMAND_ENCODE, strlen(BASE_COMMAND_ENCODE)) == 0) {
       base32_encode_command(commands);
-    } else if (strncasecmp(commands[2], BASE_COMMAND_DECODE, strlen(BASE_COMMAND_DECODE)) == 0) {
+    } else if (strncasecmp(commands[1], BASE_COMMAND_DECODE, strlen(BASE_COMMAND_DECODE)) == 0) {
       base32_decode_command(commands);
     } else {
       printf("%s\n", ERR_COMMAND_NOT_FOUND);
@@ -225,7 +229,7 @@ bool base_command(commands_t commands, int commands_length) {
 }
 
 void base64_decode_command(commands_t commands) {
-  char *string = commands[3];
+  char *string = commands[2];
   unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
   unsigned long out = sizeof(outstring);
   if (base64_decode(string, strlen(string) + 1, outstring, &out)) {
@@ -236,7 +240,7 @@ void base64_decode_command(commands_t commands) {
 }
 
 void base64_encode_command(commands_t commands) {
-  char *string = commands[3];
+  char *string = commands[2];
   unsigned long out = 4 * ((strlen(string) + 2) / 3) + 1;
   char *outstring = (char *)calloc(out, sizeof(char));
   if (base64_encode((unsigned char *)string, strlen(string), outstring, &out) != CRYPT_OK) {
@@ -247,7 +251,7 @@ void base64_encode_command(commands_t commands) {
 }
 
 void base32_encode_command(commands_t commands) {
-  char *string = commands[3];
+  char *string = commands[2];
   unsigned long out = (8 * strlen(string) + 4) / 5 + 1;
   char *outstring = (char *)calloc(out, sizeof(char));
   if (base32_encode((unsigned char *)string, strlen(string), outstring, &out, BASE32_RFC4648) != CRYPT_OK) {
@@ -259,7 +263,7 @@ void base32_encode_command(commands_t commands) {
 }
 
 void base32_decode_command(commands_t commands) {
-  char *string = commands[3];
+  char *string = commands[2];
   unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
   unsigned long out = sizeof(outstring);
   if (base32_decode(string, strlen(string), outstring, &out, BASE32_RFC4648) != CRYPT_OK) {
@@ -271,7 +275,7 @@ void base32_decode_command(commands_t commands) {
 }
 
 void base16_encode_command(commands_t commands) {
-  char *string = commands[3];
+  char *string = commands[2];
   unsigned long out = strlen(string) * 2 + 1;
   char *outstring = (char *)calloc(out, sizeof(char));
   if (base16_encode((unsigned char *)string, strlen(string), outstring, &out, 0) != CRYPT_OK) {
@@ -283,7 +287,7 @@ void base16_encode_command(commands_t commands) {
 }
 
 void base16_decode_command(commands_t commands) {
-  char *string = commands[3];
+  char *string = commands[2];
   unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
   unsigned long out = sizeof(outstring);
   if (base16_decode(string, strlen(string), outstring, &out) != CRYPT_OK) {
@@ -398,8 +402,12 @@ void completion(const char *buf, linenoiseCompletions *lc) {
 char *hints(const char *buf, int *color, int *bold) {
   *color = 32;
   *bold = 0;
-  if (strcmp(buf, "base") == 0) {
-    return " <64/32/16> <enc/dec> <string>";
+  if (strcmp(buf, "base64") == 0) {
+    return " <enc/dec> <string>";
+  } else if (strcmp(buf, "base32") == 0) {
+    return " <enc/dec> <string>";
+  } else if (strcmp(buf, "base16") == 0) {
+    return " <enc/dec> <string>";
   } else if (strcmp(buf, "hash") == 0) {
     return " <method> <string>";
   } else if (strcmp(buf, "prng") == 0) {
@@ -414,11 +422,12 @@ char *hints(const char *buf, int *color, int *bold) {
 
 bool help_command(commands_t commands, int commands_length) {
   printf("BaseX\n");
-  printf("    \033[0;32mbase\033[0m <64/32/16> <enc/dec> <string>  "
-         "\033[1;33msupport BaseX method: base64 base32 base16\033[0m\n");
+  printf("    \033[0;32mbase64\033[0m <enc/dec> <string>\n");
+  printf("    \033[0;32mbase32\033[0m <enc/dec> <string>\n");
+  printf("    \033[0;32mbase16\033[0m <enc/dec> <string>\n");
   printf("Hash\n");
   printf("    \033[0;32mhash\033[0m <method> <string>              "
-         "\033[1;33msupport Hash method: md5 sha1 sha256 sha512\033[0m\n");
+         "\033[1;33msupport Hash methods: md5 sha1 sha256 sha512\033[0m\n");
   printf("PRNG\n");
   printf("    \033[0;32mprng\033[0m <method> <string> <length>     "
          "\033[1;33msupport PRNG methods: yarrow rc4 chacha20\033[0m\n");
