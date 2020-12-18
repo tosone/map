@@ -8,12 +8,9 @@
 
 #include <tomcrypt.h>
 
-#include <avl.h>
 #include <command.h>
-#include <hashmap.h>
 #include <kilo.h>
 #include <linenoise.h>
-#include <lru.h>
 #include <tcp.h>
 
 #define VERSION "v1.0.0"
@@ -108,14 +105,7 @@ bool tcp_command(commands_t commands, int commands_length);
     continue;                                 \
   }
 
-hashmap_t *hmap;
-LRU *lru;
-avl_entry_t *avl;
-
 void clear() {
-  hashmap_free(hmap);
-  LRU_free(lru);
-  avl_free(avl);
   printf("clear all, bye\n");
 }
 
@@ -125,8 +115,6 @@ int main(int argc, char **argv) {
   linenoiseHistoryLoad("history.txt");
   linenoiseHistorySetMaxLen(1000);
 
-  hmap = hashmap_create();
-  lru = LRU_create();
   atexit(clear);
 
   if (register_all_ciphers() != CRYPT_OK) {
@@ -159,12 +147,6 @@ int main(int argc, char **argv) {
           return EXIT_SUCCESS;
         } else if (strncasecmp(commands[0], VERSION_COMMAND, strlen(VERSION_COMMAND)) == 0) {
           printf("%s\n", VERSION);
-        } else if (strncasecmp(commands[0], LRU_COMMAND, strlen(LRU_COMMAND)) == 0) {
-          COMMANDS_CHECK(!lru_command(commands, commands_length));
-        } else if (strncasecmp(commands[0], HMAP_COMMAND, strlen(HMAP_COMMAND)) == 0) {
-          COMMANDS_CHECK(!hmap_command(commands, commands_length));
-        } else if (strncasecmp(commands[0], AVL_COMMAND, strlen(AVL_COMMAND)) == 0) {
-          COMMANDS_CHECK(!avl_command(commands, commands_length));
         } else if (strncasecmp(commands[0], BASE64_COMMAND, strlen(BASE64_COMMAND)) == 0) {
           COMMANDS_CHECK(!base64_command(commands, commands_length));
         } else if (strncasecmp(commands[0], BASE64URL_COMMAND, strlen(BASE64URL_COMMAND)) == 0) {
@@ -222,25 +204,6 @@ bool vi_command(commands_t commands, int commands_length) {
 }
 
 bool help_command(commands_t commands, int commands_length) {
-  printf("Hashmap\n");
-  printf("    \033[0;32mhmap\033[0m set <key> <value>\n");
-  printf("    \033[0;32mhmap\033[0m get <key>\n");
-  printf("    \033[0;32mhmap\033[0m del <key>\n");
-  printf("    \033[0;32mhmap\033[0m cap\n");
-  printf("    \033[0;32mhmap\033[0m len\n");
-  printf("    \033[0;32mhmap\033[0m print\n");
-  printf("LRU\n");
-  printf("    \033[0;32mlru\033[0m set <num> <value>\n");
-  printf("    \033[0;32mlru\033[0m get <num>\n");
-  printf("    \033[0;32mlru\033[0m cap set <num>\n");
-  printf("    \033[0;32mlru\033[0m cap get\n");
-  printf("    \033[0;32mlru\033[0m len\n");
-  printf("    \033[0;32mlru\033[0m print\n");
-  printf("AVL-Tree\n");
-  printf("    \033[0;32mavl\033[0m set <num>\n");
-  printf("    \033[0;32mavl\033[0m get <num>\n");
-  printf("    \033[0;32mavl\033[0m print <pre/in/post>\n");
-  printf("    \033[0;32mavl\033[0m dump <filename>\n");
   printf("Base64\n");
   printf("    \033[0;32mbase64\033[0m enc <string>\n");
   printf("    \033[0;32mbase64\033[0m dec <string>\n");
@@ -308,106 +271,6 @@ bool base16_command(commands_t commands, int commands_length) {
     base16_decode_command(commands);
   } else {
     printf("%s\n", ERR_COMMAND_NOT_FOUND);
-  }
-  return MAP_COMMANDS_OK;
-}
-
-bool avl_command(commands_t commands, int commands_length) {
-  command_length_check(<, 3);
-  if (strncasecmp(commands[1], AVL_COMMAND_SET, strlen(AVL_COMMAND_SET)) == 0) {
-    command_length_check(!=, 3);
-    int key = atoi(commands[2]);
-    avl = avl_set(avl, key);
-  } else if (strncasecmp(commands[1], AVL_COMMAND_GET, strlen(AVL_COMMAND_GET)) == 0) {
-    command_length_check(!=, 3);
-    int key = atoi(commands[2]);
-    printf("%s\n", avl_get(avl, key) ? "true" : "false");
-  } else if (strncasecmp(commands[1], AVL_COMMAND_PRINT, strlen(AVL_COMMAND_PRINT)) == 0) {
-    command_length_check(!=, 3);
-    if (strncasecmp(commands[2], AVL_COMMAND_PRE, strlen(AVL_COMMAND_PRE)) == 0) {
-      avl_pre_order(avl);
-    } else if (strncasecmp(commands[2], AVL_COMMAND_IN, strlen(AVL_COMMAND_IN)) == 0) {
-      avl_in_order(avl);
-    } else if (strncasecmp(commands[2], AVL_COMMAND_POST, strlen(AVL_COMMAND_POST)) == 0) {
-      avl_post_order(avl);
-    }
-  } else if (strncasecmp(commands[1], AVL_COMMAND_DUMP, strlen(AVL_COMMAND_DUMP)) == 0) {
-    command_length_check(!=, 3);
-    char *filename = commands[2];
-    avl_dump(avl, filename);
-  }
-  return MAP_COMMANDS_OK;
-}
-
-bool hmap_command(commands_t commands, int commands_length) {
-  command_length_check(<, 2);
-  if (strncasecmp(commands[1], HMAP_COMMAND_CAP, strlen(HMAP_COMMAND_CAP)) == 0) {
-    command_length_check(!=, 2);
-    printf("%d\n", hmap->cap);
-  } else if (strncasecmp(commands[1], HMAP_COMMAND_LEN, strlen(HMAP_COMMAND_LEN)) == 0) {
-    command_length_check(!=, 2);
-    printf("%d\n", hmap->len);
-  } else if (strncasecmp(commands[1], HMAP_COMMAND_SET, strlen(HMAP_COMMAND_SET)) == 0) {
-    command_length_check(!=, 4);
-    char *key = commands[2];
-    void *value = commands[3];
-    hmap = hashmap_set(hmap, key, value, strlen(value) + 1);
-  } else if (strncasecmp(commands[1], HMAP_COMMAND_GET, strlen(HMAP_COMMAND_GET)) == 0) {
-    command_length_check(!=, 3);
-    char *key = commands[2];
-    size_t value_length = 0;
-    char *value = (char *)hashmap_get(hmap, key, &value_length);
-    if (value == NULL) {
-      printf("key not found\n");
-    } else {
-      printf("%s\n", value);
-    }
-  } else if (strncasecmp(commands[1], HMAP_COMMAND_DEL, strlen(HMAP_COMMAND_DEL)) == 0) {
-    command_length_check(!=, 3);
-    char *key = commands[2];
-    hashmap_del(hmap, key);
-  } else if (strncasecmp(commands[1], HMAP_COMMAND_PRINT, strlen(HMAP_COMMAND_PRINT)) == 0) {
-    command_length_check(!=, 2);
-    hashmap_print(hmap);
-  }
-  return MAP_COMMANDS_OK;
-}
-
-bool lru_command(commands_t commands, int commands_length) {
-  command_length_check(<, 2);
-  if (strncasecmp(commands[1], LRU_COMMAND_LEN, strlen(LRU_COMMAND_LEN)) == 0) {
-    command_length_check(!=, 2);
-    printf("%d\n", lru->len);
-  } else if (strncasecmp(commands[1], LRU_COMMAND_SET, strlen(LRU_COMMAND_SET)) == 0) {
-    command_length_check(!=, 4);
-    char *key = commands[2];
-    void *value = commands[3];
-    LRU_set(lru, key, value, strlen(value) + 1);
-  } else if (strncasecmp(commands[1], LRU_COMMAND_GET, strlen(LRU_COMMAND_GET)) == 0) {
-    command_length_check(!=, 3);
-    char *key = commands[2];
-    size_t value_length = 0;
-    char *value = (char *)LRU_get(lru, key, &value_length);
-    if (value == NULL) {
-      printf("key not found\n");
-    } else {
-      printf("%s\n", value);
-    }
-  } else if (strncasecmp(commands[1], LRU_COMMAND_CAP, strlen(LRU_COMMAND_CAP)) == 0) {
-    command_length_check(<, 3);
-    if (strncasecmp(commands[2], LRU_COMMAND_GET, strlen(LRU_COMMAND_GET)) == 0) {
-      printf("%d\n", lru->cap);
-    } else if (strncasecmp(commands[2], LRU_COMMAND_SET, strlen(LRU_COMMAND_SET)) == 0) {
-      int cap = atoi(commands[3]);
-      if (cap < lru->cap) {
-        printf("please set more bigger cap\n");
-      } else {
-        lru->cap = cap;
-      }
-    }
-  } else if (strncasecmp(commands[1], LRU_COMMAND_PRINT, strlen(LRU_COMMAND_PRINT)) == 0) {
-    command_length_check(!=, 2);
-    LRU_print(lru);
   }
   return MAP_COMMANDS_OK;
 }
