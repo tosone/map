@@ -230,9 +230,11 @@ bool server_command(commands_t commands, int commands_length) {
       printf("server stopped already\n");
       return MAP_COMMANDS_OK;
     }
-    free(serve_dir_root);
-    free(serve_dir_params);
     serve_dir_status = false;
+    free(serve_dir_root);
+    serve_dir_root = NULL;
+    free(serve_dir_params);
+    serve_dir_params = NULL;
   }
   return MAP_COMMANDS_OK;
 }
