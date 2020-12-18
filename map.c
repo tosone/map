@@ -489,6 +489,8 @@ char *hints(const char *buf, int *color, int *bold) {
     return " <filename>";
   } else if (strcmp(buf, "tcp") == 0) {
     return " <hostname> <port>";
+  } else if (strcmp(buf, "server") == 0) {
+    return " <start/stop> <dir> <port>";
   }
   return NULL;
 }
@@ -508,5 +510,6 @@ bool help_command(commands_t commands, int commands_length) {
   printf("    \033[0;32mvi\033[0m <filename>\n");
   printf("Network\n");
   printf("    \033[0;32mtcp\033[0m <hostname> <port>\n");
+  printf("    \033[0;32mserver\033[0m <start/stop> <dir> <port>\n");
   return MAP_COMMANDS_OK;
 }
