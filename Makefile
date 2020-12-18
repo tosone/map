@@ -18,7 +18,7 @@ map: $(objects)
 	$(CC) -c $(CFLAGS) $<
 
 .PHONY: deps
-deps: linenoise murmurhash libtomcrypt mongoose mbedtls kilo
+deps: linenoise murmurhash libtomcrypt mbedtls mongoose kilo
 
 .PHONY: linenoise
 linenoise:
