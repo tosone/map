@@ -254,33 +254,9 @@ bool help_command(commands_t commands, int commands_length) {
   printf("    \033[0;32mbase16\033[0m enc <string>\n");
   printf("    \033[0;32mbase16\033[0m dec <string>\n");
   printf("Hash\n");
-  printf("    \033[1;33mSupport hash methods: ");
-  for (int i = 0; i < TAB_SIZE - 1; i++) {
-    if (i == 0) {
-      printf("%s", hash_descriptor[i].name);
-    } else {
-      if (i % 7 == 0) {
-        printf("\n   ");
-      }
-      printf(" %s", hash_descriptor[i].name);
-    }
-  }
-  printf("\033[0m\n");
-  printf("    \033[0;32mhash\033[0m <method> <string>\n");
+  printf("    \033[0;32mhash\033[0m <method> <string>            \033[1;33msupport hash method: md5 sha1 sha256 sha512\033[0m\n");
   printf("PRNG\n");
-  printf("    \033[1;33mSupport prng methods: ");
-  for (int i = 0; i < 6; i++) {
-    if (i == 0) {
-      printf("%s", prng_descriptor[i].name);
-    } else {
-      if (i % 7 == 0) {
-        printf("\n   ");
-      }
-      printf(" %s", prng_descriptor[i].name);
-    }
-  }
-  printf("\033[0m\n");
-  printf("    \033[0;32mprng\033[0m <method> <string> <length>\n");
+  printf("    \033[0;32mprng\033[0m <method> <string> <length>   \033[1;33msupport prng methods: yarrow rc4 chacha20\033[0m\n");
   printf("Editor\n");
   printf("    \033[0;32mvi\033[0m <filename>\n");
   printf("Network\n");
