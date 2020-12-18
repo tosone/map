@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
+
+#include <sys/stat.h>
 
 #include <tomcrypt.h>
 
@@ -20,21 +21,9 @@
 #define PRNG_COMMAND "prng"
 #define HASH_COMMAND "hash"
 
-#define BASE64_COMMAND "base64"
-#define BASE64_COMMAND_DECODE "dec"
-#define BASE64_COMMAND_ENCODE "enc"
-
-#define BASE64URL_COMMAND "base64url"
-#define BASE64URL_COMMAND_DECODE "dec"
-#define BASE64URL_COMMAND_ENCODE "enc"
-
-#define BASE32_COMMAND "base32"
-#define BASE32_COMMAND_DECODE "dec"
-#define BASE32_COMMAND_ENCODE "enc"
-
-#define BASE16_COMMAND "base16"
-#define BASE16_COMMAND_DECODE "dec"
-#define BASE16_COMMAND_ENCODE "enc"
+#define BASE_COMMAND "base"
+#define BASE_COMMAND_DECODE "dec"
+#define BASE_COMMAND_ENCODE "enc"
 
 #define VI_COMMAND "vi"
 
@@ -75,23 +64,14 @@ char *hints(const char *buf, int *color, int *bold);
 bool prng_command(commands_t commands, int commands_length);
 bool hash_command(commands_t commands, int commands_length);
 
-bool base64_command(commands_t commands, int commands_length);
-bool base64url_command(commands_t commands, int commands_length);
-bool base32_command(commands_t commands, int commands_length);
-bool base16_command(commands_t commands, int commands_length);
+bool base_command(commands_t commands, int commands_length);
 
 void base16_encode_command(commands_t commands);
 void base16_decode_command(commands_t commands);
 void base32_encode_command(commands_t commands);
 void base32_decode_command(commands_t commands);
-void base64url_encode_command(commands_t commands);
-void base64url_decode_command(commands_t commands);
 void base64_decode_command(commands_t commands);
 void base64_encode_command(commands_t commands);
-
-bool lru_command(commands_t commands, int commands_length);
-bool hmap_command(commands_t commands, int commands_length);
-bool avl_command(commands_t commands, int commands_length);
 
 bool help_command(commands_t commands, int commands_length);
 
@@ -147,14 +127,8 @@ int main(int argc, char **argv) {
           return EXIT_SUCCESS;
         } else if (strncasecmp(commands[0], VERSION_COMMAND, strlen(VERSION_COMMAND)) == 0) {
           printf("%s\n", VERSION);
-        } else if (strncasecmp(commands[0], BASE64_COMMAND, strlen(BASE64_COMMAND)) == 0) {
-          COMMANDS_CHECK(!base64_command(commands, commands_length));
-        } else if (strncasecmp(commands[0], BASE64URL_COMMAND, strlen(BASE64URL_COMMAND)) == 0) {
-          COMMANDS_CHECK(!base64url_command(commands, commands_length));
-        } else if (strncasecmp(commands[0], BASE32_COMMAND, strlen(BASE32_COMMAND)) == 0) {
-          COMMANDS_CHECK(!base32_command(commands, commands_length));
-        } else if (strncasecmp(commands[0], BASE16_COMMAND, strlen(BASE16_COMMAND)) == 0) {
-          COMMANDS_CHECK(!base16_command(commands, commands_length));
+        } else if (strncasecmp(commands[0], BASE_COMMAND, strlen(BASE_COMMAND)) == 0) {
+          COMMANDS_CHECK(!base_command(commands, commands_length));
         } else if (strncasecmp(commands[0], HASH_COMMAND, strlen(HASH_COMMAND)) == 0) {
           COMMANDS_CHECK(!hash_command(commands, commands_length));
         } else if (strncasecmp(commands[0], PRNG_COMMAND, strlen(PRNG_COMMAND)) == 0) {
@@ -203,104 +177,41 @@ bool vi_command(commands_t commands, int commands_length) {
   return MAP_COMMANDS_OK;
 }
 
-bool help_command(commands_t commands, int commands_length) {
-  printf("Base64\n");
-  printf("    \033[0;32mbase64\033[0m enc <string>\n");
-  printf("    \033[0;32mbase64\033[0m dec <string>\n");
-  printf("Base64url\n");
-  printf("    \033[0;32mbase64url\033[0m enc <string>\n");
-  printf("    \033[0;32mbase64url\033[0m dec <string>\n");
-  printf("Base32\n");
-  printf("    \033[0;32mbase32\033[0m enc <string>\n");
-  printf("    \033[0;32mbase32\033[0m dec <string>\n");
-  printf("Base16\n");
-  printf("    \033[0;32mbase16\033[0m enc <string>\n");
-  printf("    \033[0;32mbase16\033[0m dec <string>\n");
-  printf("Hash\n");
-  printf("    \033[0;32mhash\033[0m <method> <string>            \033[1;33msupport hash method: md5 sha1 sha256 sha512\033[0m\n");
-  printf("PRNG\n");
-  printf("    \033[0;32mprng\033[0m <method> <string> <length>   \033[1;33msupport prng methods: yarrow rc4 chacha20\033[0m\n");
-  printf("Editor\n");
-  printf("    \033[0;32mvi\033[0m <filename>\n");
-  printf("Network\n");
-  printf("    \033[0;32mtcp\033[0m <hostname> <port>\n");
-  return MAP_COMMANDS_OK;
-}
-
-bool base64_command(commands_t commands, int commands_length) {
-  command_length_check(!=, 3);
-  if (strncasecmp(commands[1], BASE64_COMMAND_ENCODE, strlen(BASE64_COMMAND_ENCODE)) == 0) {
-    base64_encode_command(commands);
-  } else if (strncasecmp(commands[1], BASE64_COMMAND_DECODE, strlen(BASE64_COMMAND_DECODE)) == 0) {
-    base64_decode_command(commands);
+bool base_command(commands_t commands, int commands_length) {
+  command_length_check(!=, 4);
+  int basex = atoi(commands[1]);
+  if (basex == 64) {
+    if (strncasecmp(commands[2], BASE_COMMAND_ENCODE, strlen(BASE_COMMAND_ENCODE)) == 0) {
+      base64_encode_command(commands);
+    } else if (strncasecmp(commands[2], BASE_COMMAND_DECODE, strlen(BASE_COMMAND_DECODE)) == 0) {
+      base64_decode_command(commands);
+    } else {
+      printf("%s\n", ERR_COMMAND_NOT_FOUND);
+    }
+  } else if (basex == 32) {
+    if (strncasecmp(commands[2], BASE_COMMAND_ENCODE, strlen(BASE_COMMAND_ENCODE)) == 0) {
+      base32_encode_command(commands);
+    } else if (strncasecmp(commands[2], BASE_COMMAND_DECODE, strlen(BASE_COMMAND_DECODE)) == 0) {
+      base32_decode_command(commands);
+    } else {
+      printf("%s\n", ERR_COMMAND_NOT_FOUND);
+    }
+  } else if (basex == 16) {
+    if (strncasecmp(commands[1], BASE_COMMAND_ENCODE, strlen(BASE_COMMAND_ENCODE)) == 0) {
+      base16_encode_command(commands);
+    } else if (strncasecmp(commands[1], BASE_COMMAND_DECODE, strlen(BASE_COMMAND_DECODE)) == 0) {
+      base16_decode_command(commands);
+    } else {
+      printf("%s\n", ERR_COMMAND_NOT_FOUND);
+    }
   } else {
     printf("%s\n", ERR_COMMAND_NOT_FOUND);
   }
   return MAP_COMMANDS_OK;
-}
-
-bool base64url_command(commands_t commands, int commands_length) {
-  command_length_check(!=, 3);
-  if (strncasecmp(commands[1], BASE64URL_COMMAND_ENCODE, strlen(BASE64URL_COMMAND_ENCODE)) == 0) {
-    base64url_encode_command(commands);
-  } else if (strncasecmp(commands[1], BASE64URL_COMMAND_DECODE, strlen(BASE64URL_COMMAND_DECODE)) == 0) {
-    base64url_decode_command(commands);
-  } else {
-    printf("%s\n", ERR_COMMAND_NOT_FOUND);
-  }
-  return MAP_COMMANDS_OK;
-}
-
-bool base32_command(commands_t commands, int commands_length) {
-  command_length_check(!=, 3);
-  if (strncasecmp(commands[1], BASE32_COMMAND_ENCODE, strlen(BASE32_COMMAND_ENCODE)) == 0) {
-    base32_encode_command(commands);
-  } else if (strncasecmp(commands[1], BASE32_COMMAND_DECODE, strlen(BASE32_COMMAND_DECODE)) == 0) {
-    base32_decode_command(commands);
-  } else {
-    printf("%s\n", ERR_COMMAND_NOT_FOUND);
-  }
-  return MAP_COMMANDS_OK;
-}
-
-bool base16_command(commands_t commands, int commands_length) {
-  command_length_check(!=, 3);
-  if (strncasecmp(commands[1], BASE16_COMMAND_ENCODE, strlen(BASE16_COMMAND_ENCODE)) == 0) {
-    base16_encode_command(commands);
-  } else if (strncasecmp(commands[1], BASE16_COMMAND_DECODE, strlen(BASE16_COMMAND_DECODE)) == 0) {
-    base16_decode_command(commands);
-  } else {
-    printf("%s\n", ERR_COMMAND_NOT_FOUND);
-  }
-  return MAP_COMMANDS_OK;
-}
-
-void base64url_encode_command(commands_t commands) {
-  char *string = commands[2];
-  unsigned long out = 4 * ((strlen(string) + 2) / 3);
-  char *outstring = (char *)calloc(out, sizeof(char));
-  if (base64url_encode((unsigned char *)string, strlen(string), outstring, &out) != CRYPT_OK) {
-    map_err(ERR_INTERNAL, "base64 url encode with error");
-  } else {
-    printf("%s\n", outstring);
-  }
-  free(outstring);
-}
-
-void base64url_decode_command(commands_t commands) {
-  char *string = commands[2];
-  unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
-  unsigned long out = sizeof(outstring);
-  if (base64url_decode(string, strlen(string), outstring, &out)) {
-    map_err(ERR_INTERNAL, "base64 url decode with error");
-  } else {
-    printf("%s\n", outstring);
-  }
-  free(outstring);
 }
 
 void base64_decode_command(commands_t commands) {
-  char *string = commands[2];
+  char *string = commands[3];
   unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
   unsigned long out = sizeof(outstring);
   if (base64_decode(string, strlen(string) + 1, outstring, &out)) {
@@ -311,7 +222,7 @@ void base64_decode_command(commands_t commands) {
 }
 
 void base64_encode_command(commands_t commands) {
-  char *string = commands[2];
+  char *string = commands[3];
   unsigned long out = 4 * ((strlen(string) + 2) / 3) + 1;
   char *outstring = (char *)calloc(out, sizeof(char));
   if (base64_encode((unsigned char *)string, strlen(string), outstring, &out) != CRYPT_OK) {
@@ -322,7 +233,7 @@ void base64_encode_command(commands_t commands) {
 }
 
 void base32_encode_command(commands_t commands) {
-  char *string = commands[2];
+  char *string = commands[3];
   unsigned long out = (8 * strlen(string) + 4) / 5 + 1;
   char *outstring = (char *)calloc(out, sizeof(char));
   if (base32_encode((unsigned char *)string, strlen(string), outstring, &out, BASE32_RFC4648) != CRYPT_OK) {
@@ -332,8 +243,9 @@ void base32_encode_command(commands_t commands) {
   }
   free(outstring);
 }
+
 void base32_decode_command(commands_t commands) {
-  char *string = commands[2];
+  char *string = commands[3];
   unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
   unsigned long out = sizeof(outstring);
   if (base32_decode(string, strlen(string), outstring, &out, BASE32_RFC4648) != CRYPT_OK) {
@@ -345,7 +257,7 @@ void base32_decode_command(commands_t commands) {
 }
 
 void base16_encode_command(commands_t commands) {
-  char *string = commands[2];
+  char *string = commands[3];
   unsigned long out = strlen(string) * 2 + 1;
   char *outstring = (char *)calloc(out, sizeof(char));
   if (base16_encode((unsigned char *)string, strlen(string), outstring, &out, 0) != CRYPT_OK) {
@@ -357,7 +269,7 @@ void base16_encode_command(commands_t commands) {
 }
 
 void base16_decode_command(commands_t commands) {
-  char *string = commands[2];
+  char *string = commands[3];
   unsigned char *outstring = (unsigned char *)calloc(strlen(string) + 1, sizeof(unsigned char));
   unsigned long out = sizeof(outstring);
   if (base16_decode(string, strlen(string), outstring, &out) != CRYPT_OK) {
@@ -454,10 +366,14 @@ bool prng_command(commands_t commands, int commands_length) {
 }
 
 void completion(const char *buf, linenoiseCompletions *lc) {
-  if (buf[0] == 'l') {
-    linenoiseAddCompletion(lc, "lru");
+  if (buf[0] == 'b') {
+    linenoiseAddCompletion(lc, "base");
+  } else if (strcasecmp(buf, "ba")) {
+    linenoiseAddCompletion(lc, "base");
+  } else if (strcasecmp(buf, "bas")) {
+    linenoiseAddCompletion(lc, "base");
   } else if (buf[0] == 'h') {
-    linenoiseAddCompletion(lc, "hmap");
+    linenoiseAddCompletion(lc, "help");
   } else if (buf[0] == 'a') {
     linenoiseAddCompletion(lc, "avl");
   } else if (buf[0] == 'b') {
@@ -468,42 +384,33 @@ void completion(const char *buf, linenoiseCompletions *lc) {
 char *hints(const char *buf, int *color, int *bold) {
   *color = 32;
   *bold = 0;
-  if (strcmp(buf, "lru") == 0) {
-    return " <command>";
-  } else if (strcmp(buf, "lru len") == 0) {
-    return " <length>";
-  } else if (strcmp(buf, "lru get") == 0) {
-    return " <key>";
-  } else if (strcmp(buf, "lru set") == 0) {
-    return " <key> <value>";
-  } else if (strcmp(buf, "lru cap") == 0) {
-    return " <command> <value>";
-  } else if (strcmp(buf, "lru cap set") == 0) {
-    return " <value>";
-  } else if (strcmp(buf, "hmap") == 0) {
-    return " <command>";
-  } else if (strcmp(buf, "hmap get") == 0) {
-    return " <key>";
-  } else if (strcmp(buf, "hmap set") == 0) {
-    return " <key> <value>";
-  } else if (strcmp(buf, "hmap del") == 0) {
-    return " <key>";
-  } else if (strcmp(buf, "avl") == 0) {
-    return " <command> <params>";
-  } else if (strcmp(buf, "avl get") == 0) {
-    return " <key>";
-  } else if (strcmp(buf, "avl set") == 0) {
-    return " <key>";
-  } else if (strcmp(buf, "avl print") == 0) {
-    return " <pre/in/post>";
-  } else if (strcmp(buf, "avl dump") == 0) {
+  if (strcmp(buf, "base") == 0) {
+    return " <64/32/16> <enc/dec> <string>";
+  } else if (strcmp(buf, "hash") == 0) {
+    return " <method> <string>";
+  } else if (strcmp(buf, "prng") == 0) {
+    return " <method> <string>";
+  } else if (strcmp(buf, "vi") == 0) {
     return " <filename>";
-  } else if (strcmp(buf, "base64") == 0) {
-    return " <command> <string>";
-  } else if (strcmp(buf, "base64 dec") == 0) {
-    return " <string>";
-  } else if (strcmp(buf, "base64 enc") == 0) {
-    return " <string>";
+  } else if (strcmp(buf, "tcp") == 0) {
+    return " <hostname> <port>";
   }
   return NULL;
+}
+
+bool help_command(commands_t commands, int commands_length) {
+  printf("BaseX\n");
+  printf("    \033[0;32mbase\033[0m <64/32/16> <enc/dec> <string>  "
+         "\033[1;33msupport BaseX method: base64 base32 base16\033[0m\n");
+  printf("Hash\n");
+  printf("    \033[0;32mhash\033[0m <method> <string>              "
+         "\033[1;33msupport Hash method: md5 sha1 sha256 sha512\033[0m\n");
+  printf("PRNG\n");
+  printf("    \033[0;32mprng\033[0m <method> <string> <length>     "
+         "\033[1;33msupport PRNG methods: yarrow rc4 chacha20\033[0m\n");
+  printf("Editor\n");
+  printf("    \033[0;32mvi\033[0m <filename>\n");
+  printf("Network\n");
+  printf("    \033[0;32mtcp\033[0m <hostname> <port>\n");
+  return MAP_COMMANDS_OK;
 }
