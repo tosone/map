@@ -18,7 +18,7 @@
 #include <linenoise.h>
 #include <tcp.h>
 
-#define VERSION "v1.0.0"
+#define VERSION "v1.1.0"
 
 #define VERSION_COMMAND "version"
 #define HELP_COMMAND "help"
