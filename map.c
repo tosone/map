@@ -405,6 +405,6 @@ bool help_command(commands_t commands, int commands_length) {
   printf("System\n");
   printf("  \033[0;32muname\033[0m\n");
   printf("Game\n");
-  printf("  \033[0;32mgame\033[0m\n <2048>");
+  printf("  \033[0;32mgame\033[0m <2048>\n");
   return MAP_COMMANDS_OK;
 }
