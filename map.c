@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include <sys/stat.h>
+#include <sys/utsname.h>
 
 #include <mbedtls/base64.h>
 #include <mbedtls/md.h>
@@ -21,6 +22,7 @@
 
 #define VERSION_COMMAND "version"
 #define HELP_COMMAND "help"
+#define UNAME_COMMAND "uname"
 
 #define HASH_COMMAND "hash"
 #define HASH_COMMAND_MD5 "md5"
@@ -71,7 +73,6 @@ void map_err(char *level, char *info) {
 void print_hex(const uint8_t *b, size_t len);
 
 void completion(const char *buf, linenoiseCompletions *lc);
-char *hints(const char *buf, int *color, int *bold);
 
 bool hash_command(commands_t commands, int commands_length);
 
@@ -86,6 +87,7 @@ bool vi_command(commands_t commands, int commands_length);
 bool tcp_command(commands_t commands, int commands_length);
 
 bool server_command(commands_t commands, int commands_length);
+bool uname_command(commands_t commands, int commands_length);
 
 #define COMMANDS_CHECK(x)                     \
   if (x) {                                    \
@@ -141,7 +143,6 @@ void clear() {
 
 int main(int argc, char **argv) {
   linenoiseSetCompletionCallback(completion);
-  linenoiseSetHintsCallback(hints);
   linenoiseHistoryLoad("history.txt");
   linenoiseHistorySetMaxLen(1000);
 
@@ -179,6 +180,8 @@ int main(int argc, char **argv) {
           COMMANDS_CHECK(!tcp_command(commands, commands_length));
         } else if (strncasecmp(commands[0], SERVER_COMMAND, strlen(SERVER_COMMAND)) == 0) {
           COMMANDS_CHECK(!server_command(commands, commands_length));
+        } else if (strncasecmp(commands[0], UNAME_COMMAND, strlen(UNAME_COMMAND)) == 0) {
+          COMMANDS_CHECK(!uname_command(commands, commands_length));
         } else {
           printf("%s\n", ERR_COMMAND_NOT_FOUND);
         }
@@ -188,6 +191,13 @@ int main(int argc, char **argv) {
     free(line);
   }
   return EXIT_SUCCESS;
+}
+
+bool uname_command(commands_t commands, int commands_length) {
+  struct utsname name;
+  uname(&name);
+  printf("%s %s\n", name.sysname, name.machine);
+  return MAP_COMMANDS_OK;
 }
 
 bool server_command(commands_t commands, int commands_length) {
@@ -344,25 +354,6 @@ void completion(const char *buf, linenoiseCompletions *lc) {
   }
 }
 
-char *hints(const char *buf, int *color, int *bold) {
-  *color = 32;
-  *bold = 0;
-  if (strcmp(buf, "base64") == 0) {
-    return " <enc/dec> <string>";
-  } else if (strcmp(buf, "hash") == 0) {
-    return " <method> <string>";
-  } else if (strcmp(buf, "prng") == 0) {
-    return " <method> <string>";
-  } else if (strcmp(buf, "vi") == 0) {
-    return " <filename>";
-  } else if (strcmp(buf, "tcp") == 0) {
-    return " <hostname> <port>";
-  } else if (strcmp(buf, "server") == 0) {
-    return " <start/stop> <dir> <port>";
-  }
-  return NULL;
-}
-
 bool help_command(commands_t commands, int commands_length) {
   printf("Base64\n");
   printf("  \033[0;32mbase64\033[0m <enc/dec> <string>\n");
@@ -377,5 +368,7 @@ bool help_command(commands_t commands, int commands_length) {
   printf("Network\n");
   printf("  \033[0;32mtcp\033[0m <hostname> <port>\n");
   printf("  \033[0;32mserver\033[0m <start/stop> <dir> <port>\n");
+  printf("System\n");
+  printf("  \033[0;32muname\033[0m\n");
   return MAP_COMMANDS_OK;
 }
