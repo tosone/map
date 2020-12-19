@@ -13,6 +13,7 @@
 #include <mbedtls/md.h>
 #include <mongoose.h>
 
+#include <2048.h>
 #include <command.h>
 #include <kilo.h>
 #include <linenoise.h>
@@ -39,6 +40,9 @@
 #define SERVER_COMMAND "server"
 #define SERVER_COMMAND_START "start"
 #define SERVER_COMMAND_STOP "stop"
+
+#define GAME_COMMAND "game"
+#define GAME_COMMAND_2048 "2048"
 
 #define ERR_COMMAND "invalid command"
 #define ERR_COMMAND_NOT_FOUND "command not found"
@@ -84,6 +88,7 @@ bool tcp_command(commands_t commands, int commands_length);
 
 bool server_command(commands_t commands, int commands_length);
 bool uname_command(commands_t commands, int commands_length);
+bool game_command(commands_t commands, int commands_length);
 
 #define COMMANDS_CHECK(x)                     \
   if (x) {                                    \
@@ -176,6 +181,8 @@ int main(int argc, char **argv) {
           COMMANDS_CHECK(!server_command(commands, commands_length));
         } else if (strncasecmp(commands[0], UNAME_COMMAND, strlen(UNAME_COMMAND)) == 0) {
           COMMANDS_CHECK(!uname_command(commands, commands_length));
+        } else if (strncasecmp(commands[0], GAME_COMMAND, strlen(GAME_COMMAND)) == 0) {
+          COMMANDS_CHECK(!game_command(commands, commands_length));
         } else {
           printf("%s\n", ERR_COMMAND_NOT_FOUND);
         }
@@ -185,6 +192,14 @@ int main(int argc, char **argv) {
     free(line);
   }
   return EXIT_SUCCESS;
+}
+
+bool game_command(commands_t commands, int commands_length) {
+  command_length_check(<, 2);
+  if (strncasecmp(commands[1], GAME_COMMAND_2048, strlen(GAME_COMMAND_2048)) == 0) {
+    game2048(0, NULL);
+  }
+  return MAP_COMMANDS_OK;
 }
 
 bool uname_command(commands_t commands, int commands_length) {
@@ -389,5 +404,7 @@ bool help_command(commands_t commands, int commands_length) {
   printf("  \033[0;32mserver\033[0m <start/stop> <dir> <port>\n");
   printf("System\n");
   printf("  \033[0;32muname\033[0m\n");
+  printf("Game\n");
+  printf("  \033[0;32mgame\033[0m\n <2048>");
   return MAP_COMMANDS_OK;
 }
