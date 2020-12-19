@@ -31,8 +31,6 @@
 #define HASH_COMMAND_SHA512 "sha512"
 
 #define BASE64_COMMAND "base64"
-#define BASE32_COMMAND "base32"
-#define BASE16_COMMAND "base16"
 #define BASE_COMMAND_DECODE "dec"
 #define BASE_COMMAND_ENCODE "enc"
 
@@ -77,8 +75,6 @@ void completion(const char *buf, linenoiseCompletions *lc);
 bool hash_command(commands_t commands, int commands_length);
 
 bool base_command(commands_t commands, int commands_length);
-void base64_decode_command(commands_t commands);
-void base64_encode_command(commands_t commands);
 
 bool help_command(commands_t commands, int commands_length);
 
@@ -168,9 +164,7 @@ int main(int argc, char **argv) {
           return EXIT_SUCCESS;
         } else if (strncasecmp(commands[0], VERSION_COMMAND, strlen(VERSION_COMMAND)) == 0) {
           printf("%s\n", VERSION);
-        } else if (strncasecmp(commands[0], BASE64_COMMAND, strlen(BASE64_COMMAND)) == 0 ||
-                   strncasecmp(commands[0], BASE32_COMMAND, strlen(BASE32_COMMAND)) == 0 ||
-                   strncasecmp(commands[0], BASE16_COMMAND, strlen(BASE16_COMMAND)) == 0) {
+        } else if (strncasecmp(commands[0], BASE64_COMMAND, strlen(BASE64_COMMAND)) == 0) {
           COMMANDS_CHECK(!base_command(commands, commands_length));
         } else if (strncasecmp(commands[0], HASH_COMMAND, strlen(HASH_COMMAND)) == 0) {
           COMMANDS_CHECK(!hash_command(commands, commands_length));
@@ -266,41 +260,69 @@ bool vi_command(commands_t commands, int commands_length) {
 
 bool base_command(commands_t commands, int commands_length) {
   command_length_check(!=, 3);
+
+  char *string = commands[2];
+  char *instring = NULL;
+  size_t instring_length = 0;
+
+  bool file_exist = false;
+
+  FILE *f = NULL;
+
+  struct stat file_handler;
+  if (stat(string, &file_handler) == 0) {
+    file_exist = true;
+    f = fopen(string, "rb");
+    unsigned char buf[1024];
+    size_t n;
+    while ((n = fread(buf, 1, sizeof(buf), f)) > 0) {
+      if (instring_length == 0) {
+        instring = (char *)malloc(n * sizeof(char));
+        instring_length += n;
+        memcpy(instring, buf, n);
+      } else {
+        instring = (char *)realloc(instring, (n + instring_length) * sizeof(char));
+        memcpy(instring + instring_length, buf, n);
+        instring_length += n;
+      }
+    }
+    fclose(f);
+  }
+
+  if (!file_exist) {
+    instring = string;
+  }
+
   if (strncasecmp(commands[1], BASE_COMMAND_ENCODE, strlen(BASE_COMMAND_ENCODE)) == 0) {
-    base64_encode_command(commands);
+    size_t olen = 0;
+    mbedtls_base64_encode(NULL, 0, &olen, (unsigned char *)instring, strlen(instring));
+    char *outstring = (char *)calloc(olen, sizeof(char));
+    if (mbedtls_base64_encode((unsigned char *)outstring, olen, &olen, (unsigned char *)instring, strlen(instring)) != 0) {
+      map_err(ERR_INTERNAL, "base64 encode with error");
+    } else {
+      printf("%s\n", outstring);
+    }
+    free(outstring);
   } else if (strncasecmp(commands[1], BASE_COMMAND_DECODE, strlen(BASE_COMMAND_DECODE)) == 0) {
-    base64_decode_command(commands);
+    size_t olen = 0;
+    mbedtls_base64_decode(NULL, 0, &olen, (unsigned char *)instring, strlen(instring));
+    char *outstring = (char *)calloc(olen, sizeof(char));
+    if (mbedtls_base64_decode((unsigned char *)outstring, olen, &olen, (unsigned char *)instring, strlen(instring)) != 0) {
+      map_err(ERR_INTERNAL, "base64 encode with error");
+    } else {
+      printf("%s\n", outstring);
+    }
+    free(outstring);
   } else {
     printf("%s\n", ERR_COMMAND_NOT_FOUND);
     return MAP_COMMANDS_OK;
   }
+
+  if (file_exist) {
+    free(instring);
+  }
+
   return MAP_COMMANDS_OK;
-}
-
-void base64_decode_command(commands_t commands) {
-  char *string = commands[2];
-  size_t olen = 0;
-  mbedtls_base64_decode(NULL, 0, &olen, (unsigned char *)string, strlen(string));
-  char *outstring = (char *)calloc(olen, sizeof(char));
-  if (mbedtls_base64_decode((unsigned char *)outstring, olen, &olen, (unsigned char *)string, strlen(string)) != 0) {
-    map_err(ERR_INTERNAL, "base64 encode with error");
-  } else {
-    printf("%s\n", outstring);
-  }
-  free(outstring);
-}
-
-void base64_encode_command(commands_t commands) {
-  char *string = commands[2];
-  size_t olen = 0;
-  mbedtls_base64_encode(NULL, 0, &olen, (unsigned char *)string, strlen(string));
-  char *outstring = (char *)calloc(olen, sizeof(char));
-  if (mbedtls_base64_encode((unsigned char *)outstring, olen, &olen, (unsigned char *)string, strlen(string)) != 0) {
-    map_err(ERR_INTERNAL, "base64 encode with error");
-  } else {
-    printf("%s\n", outstring);
-  }
-  free(outstring);
 }
 
 void print_hex(const uint8_t *b, size_t len) {
@@ -356,13 +378,10 @@ void completion(const char *buf, linenoiseCompletions *lc) {
 
 bool help_command(commands_t commands, int commands_length) {
   printf("Base64\n");
-  printf("  \033[0;32mbase64\033[0m <enc/dec> <string>\n");
+  printf("  \033[0;32mbase64\033[0m <enc/dec> <string/filename>\n");
   printf("Hash\n");
-  printf("  \033[0;32mhash\033[0m <method> <string>              "
+  printf("  \033[0;32mhash\033[0m <method> <string/filename>      "
          "\033[1;33msupport Hash methods: md5 sha1 sha256 sha512\033[0m\n");
-  printf("PRNG\n");
-  printf("  \033[0;32mprng\033[0m <method> <string> <length>     "
-         "\033[1;33msupport PRNG methods: yarrow rc4 chacha20\033[0m\n");
   printf("Editor\n");
   printf("  \033[0;32mvi\033[0m <filename>\n");
   printf("Network\n");
