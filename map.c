@@ -9,8 +9,8 @@
 #include <sys/stat.h>
 
 #include <mbedtls/base64.h>
+#include <mbedtls/md.h>
 #include <mongoose.h>
-#include <tomcrypt.h>
 
 #include <command.h>
 #include <kilo.h>
@@ -21,7 +21,12 @@
 
 #define VERSION_COMMAND "version"
 #define HELP_COMMAND "help"
+
 #define HASH_COMMAND "hash"
+#define HASH_COMMAND_MD5 "md5"
+#define HASH_COMMAND_SHA1 "sha1"
+#define HASH_COMMAND_SHA256 "sha256"
+#define HASH_COMMAND_SHA512 "sha512"
 
 #define BASE64_COMMAND "base64"
 #define BASE32_COMMAND "base32"
@@ -63,10 +68,9 @@ void map_err(char *level, char *info) {
 
 #define MAP_EXIT "exit"
 
-// 命令自动完成
-void completion(const char *buf, linenoiseCompletions *lc);
+void print_hex(const uint8_t *b, size_t len);
 
-// 命令格式提示
+void completion(const char *buf, linenoiseCompletions *lc);
 char *hints(const char *buf, int *color, int *bold);
 
 bool hash_command(commands_t commands, int commands_length);
@@ -94,7 +98,7 @@ struct server_dir_t {
   int port;
 };
 
-struct server_dir_t *serve_dir_params;
+struct server_dir_t *serve_dir_params = NULL;
 bool serve_dir_status = false;
 char *serve_dir_root = NULL;
 
@@ -142,16 +146,6 @@ int main(int argc, char **argv) {
   linenoiseHistorySetMaxLen(1000);
 
   atexit(clear);
-
-  if (register_all_ciphers() != CRYPT_OK) {
-    map_err(ERR_INTERNAL, "register all ciphers with error");
-  }
-  if (register_all_hashes() != CRYPT_OK) {
-    map_err(ERR_INTERNAL, "register all hashes with error");
-  }
-  if (register_all_prngs() != CRYPT_OK) {
-    map_err(ERR_INTERNAL, "register all prngs with error");
-  }
 
   char *line;
   while ((line = linenoise("map> ")) != NULL) {
@@ -299,50 +293,45 @@ void base64_encode_command(commands_t commands) {
   free(outstring);
 }
 
+void print_hex(const uint8_t *b, size_t len) {
+  const uint8_t *end = b + len;
+  while (b < end) {
+    printf("%02x", (uint8_t)*b++);
+  }
+  printf("\n");
+}
+
 bool hash_command(commands_t commands, int commands_length) {
   command_length_check(!=, 3);
   char *hash_name = commands[1];
   char *string = commands[2];
-
-  int hash_index = find_hash(hash_name);
-  if (hash_index < 0) {
-    printf("cannot find hash method\n");
+  const mbedtls_md_info_t *md_info = NULL;
+  if (strncasecmp(hash_name, HASH_COMMAND_MD5, strlen(HASH_COMMAND_MD5)) == 0) {
+    md_info = mbedtls_md_info_from_type(MBEDTLS_MD_MD5);
+  } else if (strncasecmp(hash_name, HASH_COMMAND_SHA1, strlen(HASH_COMMAND_SHA1)) == 0) {
+    md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA1);
+  } else if (strncasecmp(hash_name, HASH_COMMAND_SHA256, strlen(HASH_COMMAND_SHA256)) == 0) {
+    md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+  } else if (strncasecmp(hash_name, HASH_COMMAND_SHA512, strlen(HASH_COMMAND_SHA512)) == 0) {
+    md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA512);
   }
-
-  unsigned char *outbyte = (unsigned char *)calloc(hash_descriptor[hash_index].hashsize, sizeof(unsigned char));
+  int hash_size = (size_t)mbedtls_md_get_size(md_info);
+  unsigned char *outbyte = (unsigned char *)calloc(hash_size, sizeof(unsigned char));
 
   struct stat file_handler;
   if (stat(string, &file_handler) == 0) {
-    unsigned long out = hash_descriptor[hash_index].hashsize;
-    if (hash_file(hash_index, string, outbyte, &out) != CRYPT_OK) {
+    if (mbedtls_md_file(md_info, string, outbyte) != 0) {
       map_err(ERR_INTERNAL, "hash file with error");
-      goto hash_command_flag;
+    } else {
+      print_hex((uint8_t *)outbyte, hash_size);
     }
   } else {
-    hash_state context;
-    if (hash_descriptor[hash_index].init(&context) != CRYPT_OK) {
-      map_err(ERR_INTERNAL, "hash init with error");
-      goto hash_command_flag;
-    }
-    if (hash_descriptor[hash_index].process(&context, (unsigned char *)string, strlen(string)) != CRYPT_OK) {
-      map_err(ERR_INTERNAL, "hash process with error");
-      goto hash_command_flag;
-    }
-    if (hash_descriptor[hash_index].done(&context, outbyte) != CRYPT_OK) {
-      map_err(ERR_INTERNAL, "hash done with error");
-      goto hash_command_flag;
+    if (mbedtls_md(md_info, (unsigned char *)string, strlen(string), outbyte) != 0) {
+      map_err(ERR_INTERNAL, "hash string with error");
+    } else {
+      print_hex((uint8_t *)outbyte, hash_size);
     }
   }
-
-  unsigned long out = hash_descriptor[hash_index].hashsize * 2 + 1;
-  char *outstring = (char *)calloc(out, sizeof(char));
-  if (base16_encode(outbyte, hash_descriptor[hash_index].hashsize, outstring, &out, 0) != CRYPT_OK) {
-    map_err(ERR_INTERNAL, "hash base16 encode with error");
-  } else {
-    printf("%s\n", outstring);
-  }
-  free(outstring);
-hash_command_flag:
   free(outbyte);
   return MAP_COMMANDS_OK;
 }
