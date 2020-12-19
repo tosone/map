@@ -1,3 +1,0 @@
-avl.png filter=lfs diff=lfs merge=lfs -text
-hashmap.png filter=lfs diff=lfs merge=lfs -text
-lru.png filter=lfs diff=lfs merge=lfs -text
