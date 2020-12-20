@@ -59,14 +59,13 @@
   }
 
 void clear();
-
 void print_hex(const uint8_t *b, size_t len);
 void completion(const char *buf, linenoiseCompletions *lc);
-bool hash_command(commands_t commands, int commands_length);
-bool base_command(commands_t commands, int commands_length);
-bool help_command(commands_t commands, int commands_length);
-bool vi_command(commands_t commands, int commands_length);
-bool tcp_command(commands_t commands, int commands_length);
-bool server_command(commands_t commands, int commands_length);
-bool uname_command(commands_t commands, int commands_length);
-bool game_command(commands_t commands, int commands_length);
+bool command_hash(commands_t commands, int commands_length);
+bool command_base64(commands_t commands, int commands_length);
+bool command_help(commands_t commands, int commands_length);
+bool command_vi(commands_t commands, int commands_length);
+bool command_tcp(commands_t commands, int commands_length);
+bool command_server(commands_t commands, int commands_length);
+bool command_uname(commands_t commands, int commands_length);
+bool command_game(commands_t commands, int commands_length);
