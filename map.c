@@ -34,6 +34,11 @@ bool command_uname(commands_t commands, int commands_length) {
   return MAP_COMMANDS_OK;
 }
 
+bool command_uptime(commands_t commands, int commands_length) {
+  printf("%lld\n", getUptime());
+  return MAP_COMMANDS_OK;
+}
+
 bool command_game(commands_t commands, int commands_length) {
   command_length_check(<, 2);
   if (strncasecmp(commands[1], COMMAND_GAME_2048, strlen(COMMAND_GAME_2048)) == 0) {
