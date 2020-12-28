@@ -14,6 +14,7 @@
 #include <mbedtls/base64.h>
 #include <mbedtls/md.h>
 #include <mongoose.h>
+#include <uptime.h>
 
 #include <2048.h>
 #include <command.h>
@@ -25,6 +26,7 @@
 #define COMMAND_HELP "help"
 #define COMMAND_EXIT "exit"
 #define COMMAND_UNAME "uname"
+#define COMMAND_UPTIME "uptime"
 #define COMMAND_VI "vi"
 #define COMMAND_TCP "tcp"
 
@@ -68,4 +70,5 @@ bool command_vi(commands_t commands, int commands_length);
 bool command_tcp(commands_t commands, int commands_length);
 bool command_server(commands_t commands, int commands_length);
 bool command_uname(commands_t commands, int commands_length);
+bool command_uptime(commands_t commands, int commands_length);
 bool command_game(commands_t commands, int commands_length);

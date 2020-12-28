@@ -48,6 +48,8 @@ int main(int argc, char **argv) {
           COMMANDS_CHECK(!command_server(commands, commands_length));
         } else if (strncasecmp(commands[0], COMMAND_UNAME, strlen(COMMAND_UNAME)) == 0) {
           COMMANDS_CHECK(!command_uname(commands, commands_length));
+        } else if (strncasecmp(commands[0], COMMAND_UPTIME, strlen(COMMAND_UPTIME)) == 0) {
+          COMMANDS_CHECK(!command_uptime(commands, commands_length));
         } else if (strncasecmp(commands[0], COMMAND_GAME, strlen(COMMAND_GAME)) == 0) {
           COMMANDS_CHECK(!command_game(commands, commands_length));
         } else {
