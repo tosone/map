@@ -35,7 +35,30 @@ bool command_uname(commands_t commands, int commands_length) {
 }
 
 bool command_uptime(commands_t commands, int commands_length) {
-  printf("%lld\n", getUptime());
+  uint64_t uptime = getUptime();
+  bool is_days = false;
+  if (uptime > 24 * 3600 * 1000) {
+    printf("%lld days", uptime / (24 * 3600 * 1000));
+    uptime = uptime % (24 * 3600 * 1000);
+    is_days = true;
+  }
+  bool is_hours = false;
+  if (uptime > 3600 * 1000 || is_days) {
+    printf(" %02lld hours", uptime / (3600 * 1000));
+    uptime = uptime % (3600 * 1000);
+    is_hours = true;
+  }
+  bool is_minutes = false;
+  if (uptime > 60 * 1000 || is_days || is_hours) {
+    printf(" %02lld minutes", uptime / (60 * 1000));
+    uptime = uptime % (60 * 1000);
+    is_minutes = true;
+  }
+  if (uptime > 1000 || is_days || is_hours || is_minutes) {
+    printf(" %02lld seconds", uptime / (1000));
+    uptime = uptime % (1000);
+  }
+  printf(" %03lld millseconds\n", uptime);
   return MAP_COMMANDS_OK;
 }
 
@@ -113,9 +136,11 @@ bool command_tcp(commands_t commands, int commands_length) {
 
 bool command_vi(commands_t commands, int commands_length) {
   command_length_check(!=, 2);
+  char *filename = commands[1];
+
   initEditor();
-  editorSelectSyntaxHighlight(commands[1]);
-  editorOpen(commands[1]);
+  editorSelectSyntaxHighlight(filename);
+  editorOpen(filename);
   enableRawMode(STDIN_FILENO);
   editorSetStatusMessage("HELP: Ctrl-S = save | Ctrl-Q = quit | Ctrl-F = find");
   while (1) {
@@ -260,6 +285,7 @@ bool command_help(commands_t commands, int commands_length) {
   printf("  \033[0;32mserver\033[0m <start/stop> <dir> <port>\n");
   printf("System\n");
   printf("  \033[0;32muname\033[0m\n");
+  printf("  \033[0;32muptime\033[0m\n");
   printf("Game\n");
   printf("  \033[0;32mgame\033[0m <2048>\n");
   return MAP_COMMANDS_OK;
