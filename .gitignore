@@ -53,4 +53,5 @@ dkms.conf
 
 map
 history.txt
-bootstrap.txt
+
+deps/gmp/.libs/
