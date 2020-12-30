@@ -34,7 +34,8 @@ static uint64_t getUptimeByUptimeFile(void) {
     return 0;
 
   double uptime;
-  fscanf(file, "%lf", &uptime);
+  if (fscanf(file, "%lf", &uptime) > 0) {
+  }
   fclose(file);
 
   return uptime * 1000;

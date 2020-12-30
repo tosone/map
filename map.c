@@ -38,27 +38,27 @@ bool command_uptime(commands_t commands, int commands_length) {
   uint64_t uptime = getUptime();
   bool is_days = false;
   if (uptime > 24 * 3600 * 1000) {
-    printf("%lld days", uptime / (24 * 3600 * 1000));
+    printf("%ld days", uptime / (24 * 3600 * 1000));
     uptime = uptime % (24 * 3600 * 1000);
     is_days = true;
   }
   bool is_hours = false;
   if (uptime > 3600 * 1000 || is_days) {
-    printf(" %02lld hours", uptime / (3600 * 1000));
+    printf(" %02ld hours", uptime / (3600 * 1000));
     uptime = uptime % (3600 * 1000);
     is_hours = true;
   }
   bool is_minutes = false;
   if (uptime > 60 * 1000 || is_days || is_hours) {
-    printf(" %02lld minutes", uptime / (60 * 1000));
+    printf(" %02ld minutes", uptime / (60 * 1000));
     uptime = uptime % (60 * 1000);
     is_minutes = true;
   }
   if (uptime > 1000 || is_days || is_hours || is_minutes) {
-    printf(" %02lld seconds", uptime / (1000));
+    printf(" %02ld seconds", uptime / (1000));
     uptime = uptime % (1000);
   }
-  printf(" %03lld millseconds\n", uptime);
+  printf(" %03ld millseconds\n", uptime);
   return MAP_COMMANDS_OK;
 }
 
