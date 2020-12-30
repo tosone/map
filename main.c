@@ -52,6 +52,8 @@ int main(int argc, char **argv) {
           COMMANDS_CHECK(!command_uptime(commands, commands_length));
         } else if (strncasecmp(commands[0], COMMAND_GAME, strlen(COMMAND_GAME)) == 0) {
           COMMANDS_CHECK(!command_game(commands, commands_length));
+        } else if (strncasecmp(commands[0], COMMAND_PI, strlen(COMMAND_PI)) == 0) {
+          COMMANDS_CHECK(!command_pi(commands, commands_length));
         } else {
           printf("%s\n", ERR_COMMAND_NOT_FOUND);
         }

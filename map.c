@@ -70,6 +70,11 @@ bool command_game(commands_t commands, int commands_length) {
   return MAP_COMMANDS_OK;
 }
 
+bool command_pi(commands_t commands, int commands_length) {
+  chudnovsky(100, 1);
+  return MAP_COMMANDS_OK;
+}
+
 static void serve_dir_cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
   if (ev == MG_EV_HTTP_MSG) mg_http_serve_dir(c, ev_data, serve_dir_root);
 }
@@ -288,5 +293,7 @@ bool command_help(commands_t commands, int commands_length) {
   printf("  \033[0;32muptime\033[0m\n");
   printf("Game\n");
   printf("  \033[0;32mgame\033[0m <2048>\n");
+  printf("Math\n");
+  printf("  \033[0;32mpi\033[0m\n");
   return MAP_COMMANDS_OK;
 }

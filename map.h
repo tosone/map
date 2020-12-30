@@ -17,6 +17,7 @@
 #include <uptime.h>
 
 #include <2048.h>
+#include <chudnovsky.h>
 #include <command.h>
 #include <tcp.h>
 
@@ -47,6 +48,8 @@
 #define COMMAND_GAME "game"
 #define COMMAND_GAME_2048 "2048"
 
+#define COMMAND_PI "pi"
+
 #define ERR_COMMAND "invalid command"
 #define ERR_COMMAND_NOT_FOUND "command not found"
 #define ERR_INTERNAL "internal error"
@@ -72,3 +75,4 @@ bool command_server(commands_t commands, int commands_length);
 bool command_uname(commands_t commands, int commands_length);
 bool command_uptime(commands_t commands, int commands_length);
 bool command_game(commands_t commands, int commands_length);
+bool command_pi(commands_t commands, int commands_length);

@@ -1,8 +1,10 @@
 CFLAGS  += -Os -Wall -I./deps/linenoise -I./deps/murmurhash \
-	-I./deps/mongoose -I./deps/kilo -I./deps/mbedtls/include -I./deps/uptime -I.
+	-I./deps/mongoose -I./deps/kilo -I./deps/mbedtls/include \
+	-I./deps/uptime -I./deps/gmp -I.
 LDFLAGS += ./deps/linenoise/linenoise.o ./deps/murmurhash/murmurhash.o \
-	./deps/mongoose/mongoose.o ./deps/kilo/kilo.o ./deps/uptime/uptime.o \
-	-L./deps/mbedtls/library -lmbedtls -lmbedcrypto -lmbedx509 -lm -pthread
+	./deps/mongoose/mongoose.o ./deps/kilo/kilo.o ./deps/uptime/uptime.o  \
+	-L./deps/mbedtls/library -lmbedtls -lmbedcrypto -lmbedx509 \
+	-L./deps/gmp/.libs -lgmp -lm -pthread
 
 objects := $(patsubst %.c,%.o,$(wildcard *.c))
 
@@ -16,7 +18,7 @@ map: $(objects)
 	$(CC) -c $(CFLAGS) $<
 
 .PHONY: deps
-deps: linenoise murmurhash mbedtls mongoose kilo uptime
+deps: linenoise murmurhash mbedtls mongoose kilo uptime gmp
 
 .PHONY: linenoise
 linenoise:
@@ -42,6 +44,10 @@ kilo:
 uptime:
 	cd deps/$@ && $(MAKE)
 
+.PHONY: gmp
+gmp:
+	cd deps/$@ && ./configure --with-pic --enable-shared=no && $(MAKE)
+
 .PHONY: clean
 clean:
 	-(cd deps/linenoise && $(MAKE) clean) > /dev/null || true
@@ -50,4 +56,5 @@ clean:
 	-(cd deps/mbedtls && $(MAKE) clean) > /dev/null || true
 	-(cd deps/kilo && $(MAKE) clean) > /dev/null || true
 	-(cd deps/uptime && $(MAKE) clean) > /dev/null || true
+	-(cd deps/gmp && $(MAKE) clean) > /dev/null || true
 	-($(RM) map *.o)
