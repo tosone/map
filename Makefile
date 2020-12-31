@@ -8,8 +8,18 @@ LDFLAGS += ./deps/linenoise/linenoise.o ./deps/murmurhash/murmurhash.o \
 
 objects := $(patsubst %.c,%.o,$(wildcard *.c))
 
+ifneq ($(shell uname),Darwin)
+  CFLAGS += -static
+endif
+
 .PHONY: all
-all: deps map
+all: map upx
+
+.PHONY: upx
+upx:
+ifneq ($(shell uname),Darwin)
+	upx --best map
+endif
 
 map: $(objects)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
