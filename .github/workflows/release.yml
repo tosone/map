@@ -12,8 +12,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: install packages
+        run: sudo apt-get -y -qq install upx
       - name: make
-        run: make
+        run: make deps && make all
       - name: Set env
         run: echo "GIT_TAG=`echo $(git describe --tags --abbrev=0)`" >> $GITHUB_ENV
       - name: Create Release
@@ -26,7 +28,7 @@ jobs:
           release_name: ${{ github.ref }}
           draft: false
           prerelease: false
-          body: Download asset [`map`](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map), and `chmod +x map`, run it anywhere.
+          body: Download asset [`map`](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map), and `chmod +x map`, static compiled run it anywhere on Linux.
       - name: Upload Release Asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1

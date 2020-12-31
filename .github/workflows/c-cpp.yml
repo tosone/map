@@ -12,5 +12,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: install packages
+        run: sudo apt-get -y -qq install upx
       - name: make
-        run: make
+        run: make deps && make all
