@@ -27,7 +27,7 @@
 
 ### Network
 
-- `tcp <host> <port>` 测试 host 的端口是否通。
+- `tcp <ip> <port>` 测试 host 的端口是否通。
 
 ### System
 
