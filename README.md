@@ -37,3 +37,7 @@
 ### Game
 
 - `game <name>` 开始某个游戏。
+
+### Pi
+
+- `pi <length>` 计算 pi 值。

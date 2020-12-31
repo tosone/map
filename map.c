@@ -71,7 +71,14 @@ bool command_game(commands_t commands, int commands_length) {
 }
 
 bool command_pi(commands_t commands, int commands_length) {
-  chudnovsky(100, 1);
+  int length = 100;
+  if (commands_length == 2) {
+    length = atoi(commands[1]);
+  }
+  if (length < 100) {
+    length = 100;
+  }
+  chudnovsky((long)(length), 1);
   return MAP_COMMANDS_OK;
 }
 
@@ -282,18 +289,19 @@ bool command_help(commands_t commands, int commands_length) {
   printf("  \033[0;32mbase64\033[0m <enc/dec> <string/filename>\n");
   printf("Hash\n");
   printf("  \033[0;32mhash\033[0m <method> <string/filename>      "
-         "\033[1;33msupport Hash methods: md5 sha1 sha256 sha512\033[0m\n");
+         "\033[1;33msupport hash methods: md5 sha1 sha256 sha512\033[0m\n");
   printf("Editor\n");
   printf("  \033[0;32mvi\033[0m <filename>\n");
   printf("Network\n");
-  printf("  \033[0;32mtcp\033[0m <hostname> <port>\n");
+  printf("  \033[0;32mtcp\033[0m <ip> <port>\n");
   printf("  \033[0;32mserver\033[0m <start/stop> <dir> <port>\n");
   printf("System\n");
   printf("  \033[0;32muname\033[0m\n");
   printf("  \033[0;32muptime\033[0m\n");
   printf("Game\n");
-  printf("  \033[0;32mgame\033[0m <2048>\n");
+  printf("  \033[0;32mgame\033[0m <name>                          "
+         "\033[1;33msupport game: 2048\033[0m\n");
   printf("Math\n");
-  printf("  \033[0;32mpi\033[0m\n");
+  printf("  \033[0;32mpi\033[0m <length>\n");
   return MAP_COMMANDS_OK;
 }
