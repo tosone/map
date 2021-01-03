@@ -78,7 +78,7 @@ bool command_pi(commands_t commands, int commands_length) {
   if (length < 100) {
     length = 100;
   }
-  chudnovsky((long)(length), 1);
+  pi(length);
   return MAP_COMMANDS_OK;
 }
 
