@@ -1,5 +1,4 @@
 #include <stdint.h>
-// #include <uptime.h>
 
 #ifdef _WIN32
 #include <windows.h>
