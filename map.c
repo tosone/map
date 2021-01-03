@@ -62,6 +62,15 @@ bool command_uptime(commands_t commands, int commands_length) {
   return MAP_COMMANDS_OK;
 }
 
+bool command_hostname(commands_t commands, int commands_length) {
+  char name[_POSIX_HOST_NAME_MAX + 1];
+  if (gethostname(name, sizeof name) == -1) {
+    printf("cannot get hostname\n");
+  }
+  printf("%s\n", name);
+  return MAP_COMMANDS_OK;
+}
+
 bool command_game(commands_t commands, int commands_length) {
   command_length_check(<, 2);
   if (strncasecmp(commands[1], COMMAND_GAME_2048, strlen(COMMAND_GAME_2048)) == 0) {
@@ -298,10 +307,15 @@ bool command_help(commands_t commands, int commands_length) {
   printf("System\n");
   printf("  \033[0;32muname\033[0m\n");
   printf("  \033[0;32muptime\033[0m\n");
+  printf("  \033[0;32mhostname\033[0m\n");
   printf("Game\n");
   printf("  \033[0;32mgame\033[0m <name>                          "
          "\033[1;33msupport game: 2048\033[0m\n");
   printf("Math\n");
   printf("  \033[0;32mpi\033[0m <length>\n");
+  printf("Map\n");
+  printf("  \033[0;32mhelp\033[0m\n");
+  printf("  \033[0;32mexit\033[0m\n");
+  printf("  \033[0;32mversion\033[0m\n");
   return MAP_COMMANDS_OK;
 }

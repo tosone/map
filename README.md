@@ -8,6 +8,10 @@
 
 - `help` 获取当前的帮助信息。
 
+### Exit
+
+- `exit` 结束程序。
+
 ### Version
 
 - `version` 获取当前版本。
@@ -33,6 +37,7 @@
 
 - `uname` 获取系统架构信息。
 - `uptime` 获取系统开机多久。
+- `hostname` 获取 hostname。
 
 ### Game
 

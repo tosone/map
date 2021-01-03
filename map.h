@@ -1,4 +1,5 @@
 #include <inttypes.h>
+#include <limits.h>
 #include <pthread.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -6,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include <sys/stat.h>
 #include <sys/utsname.h>
@@ -27,10 +29,6 @@
 #define COMMAND_VERSION "version"
 #define COMMAND_HELP "help"
 #define COMMAND_EXIT "exit"
-#define COMMAND_UNAME "uname"
-#define COMMAND_UPTIME "uptime"
-#define COMMAND_VI "vi"
-#define COMMAND_TCP "tcp"
 
 #define COMMAND_HASH "hash"
 #define COMMAND_HASH_MD5 "md5"
@@ -42,9 +40,17 @@
 #define COMMAND_BASE64_DECODE "dec"
 #define COMMAND_BASE64_ENCODE "enc"
 
+#define COMMAND_VI "vi"
+
+#define COMMAND_TCP "tcp"
+
 #define COMMAND_SERVER "server"
 #define COMMAND_SERVER_START "start"
 #define COMMAND_SERVER_STOP "stop"
+
+#define COMMAND_UNAME "uname"
+#define COMMAND_UPTIME "uptime"
+#define COMMAND_HOSTNAME "hostname"
 
 #define COMMAND_GAME "game"
 #define COMMAND_GAME_2048 "2048"
@@ -75,5 +81,6 @@ bool command_tcp(commands_t commands, int commands_length);
 bool command_server(commands_t commands, int commands_length);
 bool command_uname(commands_t commands, int commands_length);
 bool command_uptime(commands_t commands, int commands_length);
+bool command_hostname(commands_t commands, int commands_length);
 bool command_game(commands_t commands, int commands_length);
 bool command_pi(commands_t commands, int commands_length);
