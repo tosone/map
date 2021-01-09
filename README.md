@@ -46,3 +46,7 @@
 ### Pi
 
 - `pi <length>` 计算 pi 值。
+
+### Random
+
+- `uuid` 产生 UUID。

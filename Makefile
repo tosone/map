@@ -1,9 +1,9 @@
 CFLAGS  += -Os -Wall -I./deps/linenoise -I./deps/murmurhash \
 	-I./deps/mongoose -I./deps/kilo -I./deps/mbedtls/include \
-	-I./deps/uptime -I.
+	-I./deps/uptime -I./deps/uuid4 -I.
 LDFLAGS += ./deps/linenoise/linenoise.o ./deps/murmurhash/murmurhash.o \
 	./deps/mongoose/mongoose.o ./deps/kilo/kilo.o ./deps/uptime/uptime.o  \
-	-L./deps/mbedtls/library -lmbedtls -lmbedcrypto -lm -pthread
+	./deps/uuid4/uuid4.o -L./deps/mbedtls/library -lmbedtls -lmbedcrypto -lm -pthread
 
 objects := $(patsubst %.c,%.o,$(wildcard *.c))
 
@@ -27,7 +27,7 @@ map: $(objects)
 	$(CC) -c $(CFLAGS) $<
 
 .PHONY: deps
-deps: linenoise murmurhash mbedtls mongoose kilo uptime
+deps: linenoise murmurhash mbedtls mongoose kilo uptime uuid4
 
 .PHONY: linenoise
 linenoise:
@@ -53,6 +53,10 @@ kilo:
 uptime:
 	cd deps/$@ && $(MAKE)
 
+.PHONY: uuid4
+uuid4:
+	cd deps/$@ && $(MAKE)
+
 .PHONY: clean
 clean:
 	-(cd deps/linenoise && $(MAKE) clean) > /dev/null || true
@@ -61,4 +65,5 @@ clean:
 	-(cd deps/mbedtls && $(MAKE) clean) > /dev/null || true
 	-(cd deps/kilo && $(MAKE) clean) > /dev/null || true
 	-(cd deps/uptime && $(MAKE) clean) > /dev/null || true
+	-(cd deps/uuid4 && $(MAKE) clean) > /dev/null || true
 	-($(RM) map *.o)
