@@ -285,6 +285,17 @@ bool command_hash(commands_t commands, int commands_length) {
   return MAP_COMMANDS_OK;
 }
 
+bool command_uuid(commands_t commands, int commands_length) {
+  char buf[UUID4_LEN];
+  if (uuid4_init() == UUID4_EFAILURE) {
+    printf("uuid init error\n");
+    return MAP_COMMANDS_OK;
+  }
+  uuid4_generate(buf);
+  printf("%s\n", buf);
+  return MAP_COMMANDS_OK;
+}
+
 void completion(const char *buf, linenoiseCompletions *lc) {
   if (buf[0] == 'b') {
     linenoiseAddCompletion(lc, "base64");
@@ -313,6 +324,8 @@ bool command_help(commands_t commands, int commands_length) {
          "\033[1;33msupport game: 2048\033[0m\n");
   printf("Math\n");
   printf("  \033[0;32mpi\033[0m <length>\n");
+  printf("Random\n");
+  printf("  \033[0;32muuid\033[0m\n");
   printf("Map\n");
   printf("  \033[0;32mhelp\033[0m\n");
   printf("  \033[0;32mexit\033[0m\n");

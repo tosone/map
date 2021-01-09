@@ -18,6 +18,7 @@
 #include <mbedtls/md.h>
 #include <mongoose.h>
 #include <uptime.h>
+#include <uuid4.h>
 
 #include <2048.h>
 #include <command.h>
@@ -57,6 +58,8 @@
 
 #define COMMAND_PI "pi"
 
+#define COMMAND_UUID "uuid"
+
 #define ERR_COMMAND "invalid command"
 #define ERR_COMMAND_NOT_FOUND "command not found"
 #define ERR_INTERNAL "internal error"
@@ -84,3 +87,4 @@ bool command_uptime(commands_t commands, int commands_length);
 bool command_hostname(commands_t commands, int commands_length);
 bool command_game(commands_t commands, int commands_length);
 bool command_pi(commands_t commands, int commands_length);
+bool command_uuid(commands_t commands, int commands_length);
