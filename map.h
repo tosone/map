@@ -21,7 +21,10 @@
 #include <uuid4.h>
 
 #include <2048.h>
+#include <avl.h>
 #include <command.h>
+#include <hashmap.h>
+#include <lru.h>
 #include <pi.h>
 #include <tcp.h>
 
@@ -60,6 +63,32 @@
 
 #define COMMAND_UUID "uuid"
 
+#define COMMAND_ALGORITHM "algo"
+
+#define COMMAND_HMAP "hmap"
+#define COMMAND_HMAP_GET "get"
+#define COMMAND_HMAP_SET "set"
+#define COMMAND_HMAP_DEL "del"
+#define COMMAND_HMAP_CAP "cap"
+#define COMMAND_HMAP_LEN "len"
+#define COMMAND_HMAP_PRINT "print"
+
+#define COMMAND_LRU "lru"
+#define COMMAND_LRU_LEN "len"
+#define COMMAND_LRU_GET "get"
+#define COMMAND_LRU_SET "set"
+#define COMMAND_LRU_CAP "cap"
+#define COMMAND_LRU_PRINT "print"
+
+#define COMMAND_AVL "avl"
+#define COMMAND_AVL_GET "get"
+#define COMMAND_AVL_SET "set"
+#define COMMAND_AVL_PRINT "print"
+#define COMMAND_AVL_IN "in"
+#define COMMAND_AVL_PRE "pre"
+#define COMMAND_AVL_POST "post"
+#define COMMAND_AVL_DUMP "dump"
+
 #define ERR_COMMAND "invalid command"
 #define ERR_COMMAND_NOT_FOUND "command not found"
 #define ERR_INTERNAL "internal error"
@@ -74,6 +103,8 @@
   }
 
 void clear();
+void algorithm_init();
+
 void print_hex(const uint8_t *b, size_t len);
 void completion(const char *buf, linenoiseCompletions *lc);
 bool command_hash(commands_t commands, int commands_length);
@@ -88,3 +119,7 @@ bool command_hostname(commands_t commands, int commands_length);
 bool command_game(commands_t commands, int commands_length);
 bool command_pi(commands_t commands, int commands_length);
 bool command_uuid(commands_t commands, int commands_length);
+bool command_algorithm(commands_t commands, int commands_length);
+bool command_hmap(commands_t commands, int commands_length);
+bool command_lru(commands_t commands, int commands_length);
+bool command_avl(commands_t commands, int commands_length);

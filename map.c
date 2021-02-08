@@ -16,6 +16,12 @@ int serve_dir_port = 0;
 bool serve_dir_status = false;
 char *serve_dir_root = NULL;
 
+hashmap_t *hmap;
+LRU *lru;
+avl_entry_t *avl;
+
+bool algorithm = false;
+
 void clear() {
   if (serve_dir_status) {
     serve_dir_status = false;
@@ -24,7 +30,133 @@ void clear() {
   if (serve_dir_root != NULL) {
     free(serve_dir_root);
   }
+  if (algorithm) {
+    hashmap_free(hmap);
+    LRU_free(lru);
+    avl_free(avl);
+  }
   printf("clear all, bye\n");
+}
+
+bool command_algorithm(commands_t commands, int commands_length) {
+  algorithm_init();
+  printf("Algorithm mode started");
+  return MAP_COMMANDS_OK;
+}
+
+void algorithm_init() {
+  hmap = hashmap_create();
+  lru = LRU_create();
+  algorithm = true;
+}
+
+bool command_avl(commands_t commands, int commands_length) {
+  if (!algorithm) {
+    algorithm_init();
+  }
+  command_length_check(<, 3);
+  if (strncasecmp(commands[1], COMMAND_AVL_SET, strlen(COMMAND_AVL_SET)) == 0) {
+    command_length_check(!=, 3);
+    int key = atoi(commands[2]);
+    avl = avl_set(avl, key);
+  } else if (strncasecmp(commands[1], COMMAND_AVL_GET, strlen(COMMAND_AVL_GET)) == 0) {
+    command_length_check(!=, 3);
+    int key = atoi(commands[2]);
+    printf("%s\n", avl_get(avl, key) ? "true" : "false");
+  } else if (strncasecmp(commands[1], COMMAND_AVL_PRINT, strlen(COMMAND_AVL_PRINT)) == 0) {
+    command_length_check(!=, 3);
+    if (strncasecmp(commands[2], COMMAND_AVL_PRE, strlen(COMMAND_AVL_PRE)) == 0) {
+      avl_pre_order(avl);
+    } else if (strncasecmp(commands[2], COMMAND_AVL_IN, strlen(COMMAND_AVL_IN)) == 0) {
+      avl_in_order(avl);
+    } else if (strncasecmp(commands[2], COMMAND_AVL_POST, strlen(COMMAND_AVL_POST)) == 0) {
+      avl_post_order(avl);
+    }
+  } else if (strncasecmp(commands[1], COMMAND_AVL_DUMP, strlen(COMMAND_AVL_DUMP)) == 0) {
+    command_length_check(!=, 3);
+    char *filename = commands[2];
+    avl_dump(avl, filename);
+  }
+  return MAP_COMMANDS_OK;
+}
+
+bool command_lru(commands_t commands, int commands_length) {
+  if (!algorithm) {
+    algorithm_init();
+  }
+  command_length_check(<, 2);
+  if (strncasecmp(commands[1], COMMAND_LRU_LEN, strlen(COMMAND_LRU_LEN)) == 0) {
+    command_length_check(!=, 2);
+    printf("%d\n", lru->len);
+  } else if (strncasecmp(commands[1], COMMAND_LRU_SET, strlen(COMMAND_LRU_SET)) == 0) {
+    command_length_check(!=, 4);
+    char *key = commands[2];
+    void *value = commands[3];
+    LRU_set(lru, key, value, strlen(value) + 1);
+  } else if (strncasecmp(commands[1], COMMAND_LRU_GET, strlen(COMMAND_LRU_GET)) == 0) {
+    command_length_check(!=, 3);
+    char *key = commands[2];
+    size_t value_length = 0;
+    char *value = (char *)LRU_get(lru, key, &value_length);
+    if (value == NULL) {
+      printf("key not found\n");
+    } else {
+      printf("%s\n", value);
+    }
+  } else if (strncasecmp(commands[1], COMMAND_LRU_CAP, strlen(COMMAND_LRU_CAP)) == 0) {
+    command_length_check(<, 3);
+    if (strncasecmp(commands[2], COMMAND_LRU_GET, strlen(COMMAND_LRU_GET)) == 0) {
+      printf("%d\n", lru->cap);
+    } else if (strncasecmp(commands[2], COMMAND_LRU_SET, strlen(COMMAND_LRU_SET)) == 0) {
+      int cap = atoi(commands[3]);
+      if (cap < lru->cap) {
+        printf("please set more bigger cap\n");
+      } else {
+        lru->cap = cap;
+      }
+    }
+  } else if (strncasecmp(commands[1], COMMAND_LRU_PRINT, strlen(COMMAND_LRU_PRINT)) == 0) {
+    command_length_check(!=, 2);
+    LRU_print(lru);
+  }
+  return MAP_COMMANDS_OK;
+}
+
+bool command_hmap(commands_t commands, int commands_length) {
+  if (!algorithm) {
+    algorithm_init();
+  }
+  command_length_check(<, 2);
+  if (strncasecmp(commands[1], COMMAND_HMAP_CAP, strlen(COMMAND_HMAP_CAP)) == 0) {
+    command_length_check(!=, 2);
+    printf("%d\n", hmap->cap);
+  } else if (strncasecmp(commands[1], COMMAND_HMAP_LEN, strlen(COMMAND_HMAP_LEN)) == 0) {
+    command_length_check(!=, 2);
+    printf("%d\n", hmap->len);
+  } else if (strncasecmp(commands[1], COMMAND_HMAP_SET, strlen(COMMAND_HMAP_SET)) == 0) {
+    command_length_check(!=, 4);
+    char *key = commands[2];
+    void *value = commands[3];
+    hmap = hashmap_set(hmap, key, value, strlen(value) + 1);
+  } else if (strncasecmp(commands[1], COMMAND_HMAP_GET, strlen(COMMAND_HMAP_GET)) == 0) {
+    command_length_check(!=, 3);
+    char *key = commands[2];
+    size_t value_length = 0;
+    char *value = (char *)hashmap_get(hmap, key, &value_length);
+    if (value == NULL) {
+      printf("key not found\n");
+    } else {
+      printf("%s\n", value);
+    }
+  } else if (strncasecmp(commands[1], COMMAND_HMAP_DEL, strlen(COMMAND_HMAP_DEL)) == 0) {
+    command_length_check(!=, 3);
+    char *key = commands[2];
+    hashmap_del(hmap, key);
+  } else if (strncasecmp(commands[1], COMMAND_HMAP_PRINT, strlen(COMMAND_HMAP_PRINT)) == 0) {
+    command_length_check(!=, 2);
+    hashmap_print(hmap);
+  }
+  return MAP_COMMANDS_OK;
 }
 
 bool command_uname(commands_t commands, int commands_length) {
