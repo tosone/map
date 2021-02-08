@@ -58,6 +58,14 @@ int main(int argc, char **argv) {
           COMMANDS_CHECK(!command_pi(commands, commands_length));
         } else if (strncasecmp(commands[0], COMMAND_UUID, strlen(COMMAND_UUID)) == 0) {
           COMMANDS_CHECK(!command_uuid(commands, commands_length));
+        } else if (strncasecmp(commands[0], COMMAND_ALGORITHM, strlen(COMMAND_ALGORITHM)) == 0) {
+          COMMANDS_CHECK(!command_algorithm(commands, commands_length));
+        } else if (strncasecmp(commands[0], COMMAND_HMAP, strlen(COMMAND_HMAP)) == 0) {
+          COMMANDS_CHECK(!command_hmap(commands, commands_length));
+        } else if (strncasecmp(commands[0], COMMAND_LRU, strlen(COMMAND_LRU)) == 0) {
+          COMMANDS_CHECK(!command_lru(commands, commands_length));
+        } else if (strncasecmp(commands[0], COMMAND_AVL, strlen(COMMAND_AVL)) == 0) {
+          COMMANDS_CHECK(!command_avl(commands, commands_length));
         } else {
           printf("%s\n", ERR_COMMAND_NOT_FOUND);
         }
