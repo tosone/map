@@ -1,26 +1,32 @@
-CFLAGS  += -Os -Wall -I./deps/linenoise -I./deps/murmurhash \
+CFLAGS   += -Os -Wall -I./deps/linenoise -I./deps/murmurhash \
 	-I./deps/mongoose -I./deps/kilo -I./deps/mbedtls/include \
 	-I./deps/uptime -I./deps/uuid4 -I.
-LDFLAGS += ./deps/linenoise/linenoise.o ./deps/murmurhash/murmurhash.o \
+LDFLAGS  += ./deps/linenoise/linenoise.o ./deps/murmurhash/murmurhash.o \
 	./deps/mongoose/mongoose.o ./deps/kilo/kilo.o ./deps/uptime/uptime.o  \
 	./deps/uuid4/uuid4.o -L./deps/mbedtls/library -lmbedtls -lmbedcrypto -lm -pthread
 
-objects := $(patsubst %.c,%.o,$(wildcard *.c))
+ifeq ($(PREFIX),)
+  PREFIX := /usr/local
+endif
+
+TARGET    = map
+
+objects  := $(patsubst %.c,%.o,$(wildcard *.c))
 
 ifneq ($(shell uname),Darwin)
   CFLAGS += -static
 endif
 
 .PHONY: all
-all: map upx
+all: $(TARGET) upx
 
 .PHONY: upx
 upx:
 ifneq ($(shell uname),Darwin)
-	upx --best map
+	upx --best $(TARGET)
 endif
 
-map: $(objects)
+$(TARGET): $(objects)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 %.o: %.c
@@ -67,3 +73,7 @@ clean:
 	-(cd deps/uptime && $(MAKE) clean) > /dev/null || true
 	-(cd deps/uuid4 && $(MAKE) clean) > /dev/null || true
 	-($(RM) map *.o)
+
+.PHONY: install
+install:
+	install -m 755 $(TARGET) $(PREFIX)/bin
