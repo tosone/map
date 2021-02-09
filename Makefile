@@ -1,18 +1,19 @@
-CFLAGS   += -Os -Wall -I./deps/linenoise -I./deps/murmurhash \
+CFLAGS    += -Os -Wall -I./deps/linenoise -I./deps/murmurhash \
 	-I./deps/mongoose -I./deps/kilo -I./deps/mbedtls/include \
-	-I./deps/uptime -I./deps/uuid4 -I./algo -I.
-LDFLAGS  += ./deps/linenoise/linenoise.o ./deps/murmurhash/murmurhash.o \
+	-I./deps/uptime -I./deps/uuid4 -I./deps/sds -I./algo -I.
+LDFLAGS   += ./deps/linenoise/linenoise.o ./deps/murmurhash/murmurhash.o \
 	./deps/mongoose/mongoose.o ./deps/kilo/kilo.o ./deps/uptime/uptime.o  \
-	./deps/uuid4/uuid4.o $(patsubst %.c, %.o, $(wildcard algo/*.c)) \
+	./deps/uuid4/uuid4.o ./deps/sds/sds.o $(patsubst %.c, %.o, $(wildcard algo/*.c)) \
 	-L./deps/mbedtls/library -lmbedtls -lmbedcrypto -lm -pthread
 
 ifeq ($(PREFIX),)
-  PREFIX := /usr/local
+  PREFIX  := /usr/local
 endif
 
-TARGET    = map
+TARGET     = map
 
-objects   = $(patsubst %.c, %.o, $(wildcard *.c))
+objects    = $(patsubst %.c, %.o, $(wildcard *.c))
+dependency = linenoise murmurhash mbedtls mongoose kilo uptime uuid4 sds
 
 ifneq ($(shell uname),Darwin)
   CFLAGS += -static
@@ -35,34 +36,10 @@ $(TARGET): $(objects)
 	$(CC) -c $(CFLAGS) $<
 
 .PHONY: deps
-deps: linenoise murmurhash mbedtls mongoose kilo uptime uuid4
+deps: $(dependency)
 
-.PHONY: linenoise
-linenoise:
-	cd deps/$@ && $(MAKE)
-
-.PHONY: murmurhash
-murmurhash:
-	cd deps/$@ && $(MAKE)
-
-.PHONY: mongoose
-mongoose:
-	cd deps/$@ && $(MAKE)
-
-.PHONY: mbedtls
-mbedtls:
-	cd deps/$@ && $(MAKE) programs
-
-.PHONY: kilo
-kilo:
-	cd deps/$@ && $(MAKE)
-
-.PHONY: uptime
-uptime:
-	cd deps/$@ && $(MAKE)
-
-.PHONY: uuid4
-uuid4:
+.PHONY: $(dependency)
+$(dependency):
 	cd deps/$@ && $(MAKE)
 
 .PHONY: clean

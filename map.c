@@ -19,6 +19,7 @@ char *serve_dir_root = NULL;
 hashmap_t *hmap;
 LRU *lru;
 avl_entry_t *avl;
+skiplist *sklist;
 
 bool algorithm = false;
 
@@ -34,20 +35,79 @@ void clear() {
     hashmap_free(hmap);
     LRU_free(lru);
     avl_free(avl);
+    slFree(sklist);
   }
   printf("clear all, bye\n");
 }
 
 bool command_algorithm(commands_t commands, int commands_length) {
   algorithm_init();
-  printf("Algorithm mode started");
+  printf("Algorithm mode started\n");
   return MAP_COMMANDS_OK;
 }
 
 void algorithm_init() {
   hmap = hashmap_create();
   lru = LRU_create();
+  sklist = slCreate();
+
+  slInsert(sklist, 3.0, sdsnew("test"));
+  slInsert(sklist, 3.1, sdsnew("test1")); // 2
+  slInsert(sklist, 3.2, sdsnew("test2")); // 3
+  slInsert(sklist, 3.3, sdsnew("test3")); // 4
+  slInsert(sklist, 3.3, sdsnew("test4")); // 5
+  slInsert(sklist, 3.4, sdsnew("test4")); // 6
+  slInsert(sklist, 3.4, sdsnew("test4")); // 7
+  slInsert(sklist, 3.4, sdsnew("test4")); // 8
+  slInsert(sklist, 3.4, sdsnew("test4")); // 9
+  slInsert(sklist, 3.4, sdsnew("test4")); // 10
+  slInsert(sklist, 3.4, sdsnew("test4")); // 11
+  printf("rank test: %lu\n", slGetRank(sklist, 3.0, sdsnew("test")));
+  printf("rank test1: %lu\n", slGetRank(sklist, 3.1, sdsnew("test1")));
+  printf("rank test2: %lu\n", slGetRank(sklist, 3.2, sdsnew("test2")));
+  printf("rank test3: %lu\n", slGetRank(sklist, 3.3, sdsnew("test3")));
+  printf("rank test4: %lu\n", slGetRank(sklist, 3.3, sdsnew("test4")));
+  printf("rank rake test4: %lu\n", slGetRank(sklist, 3.4, sdsnew("test4")));
   algorithm = true;
+}
+
+bool command_sklist(commands_t commands, int commands_length) {
+  if (!algorithm) {
+    algorithm_init();
+  }
+  command_length_check(<, 3);
+  if (strncasecmp(commands[1], COMMAND_SKLIST_SET, strlen(COMMAND_SKLIST_SET)) == 0) {
+    command_length_check(!=, 4);
+    double score = strtod(commands[2], NULL);
+    sds ele = sdsnew(commands[3]);
+    slInsert(sklist, score, ele);
+  } else if (strncasecmp(commands[1], COMMAND_SKLIST_GET, strlen(COMMAND_SKLIST_GET)) == 0) {
+    command_length_check(!=, 4);
+    double score = strtod(commands[2], NULL);
+    sds ele = sdsnew(commands[3]);
+    unsigned long rank = slGetRank(sklist, score, ele);
+    sdsfree(ele);
+    skiplistNode *node = sklist->header->level->forward;
+    while (node != NULL) {
+      printf("%s\n", node->ele);
+      node = node->level->forward;
+    }
+    if (rank == 0) {
+      printf("cannot find this element\n");
+    } else {
+      printf("%lu\n", rank);
+    }
+  } else if (strncasecmp(commands[1], COMMAND_SKLIST_DEL, strlen(COMMAND_SKLIST_DEL)) == 0) {
+    command_length_check(!=, 4);
+    double score = strtod(commands[2], NULL);
+    sds ele = sdsnew(commands[3]);
+    int ret = slDelete(sklist, score, ele, NULL);
+    sdsfree(ele);
+    if (ret == 0) {
+      printf("cannot find this element");
+    }
+  }
+  return MAP_COMMANDS_OK;
 }
 
 bool command_avl(commands_t commands, int commands_length) {
