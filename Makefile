@@ -1,22 +1,18 @@
-CFLAGS    += -Os -Wall -I./deps/linenoise -I./deps/murmurhash \
-	-I./deps/mongoose -I./deps/kilo -I./deps/mbedtls/include \
-	-I./deps/uptime -I./deps/uuid4 -I./deps/sds -I./algo -I.
-LDFLAGS   += ./deps/linenoise/linenoise.o ./deps/murmurhash/murmurhash.o \
-	./deps/mongoose/mongoose.o ./deps/kilo/kilo.o ./deps/uptime/uptime.o  \
-	./deps/uuid4/uuid4.o ./deps/sds/sds.o $(patsubst %.c, %.o, $(wildcard algo/*.c)) \
-	-L./deps/mbedtls/library -lmbedtls -lmbedcrypto -lm -pthread
+TARGET     = map
+objects    = $(patsubst %.c, %.o, $(wildcard *.c))
+dependency = linenoise murmurhash mbedtls mongoose kilo uptime uuid4 sds
 
 ifeq ($(PREFIX),)
   PREFIX  := /usr/local
 endif
 
-TARGET     = map
-
-objects    = $(patsubst %.c, %.o, $(wildcard *.c))
-dependency = linenoise murmurhash mbedtls mongoose kilo uptime uuid4 sds
+CFLAGS  += -Os -Wall $(foreach dep, $(dependency), $(if $(findstring $(dep), mbedtls), -I./deps/$(dep)/include, -I./deps/$(dep))) -I./algo -I.
+LDFLAGS += $(foreach dep, $(dependency), $(if $(findstring $(dep), mbedtls), , ./deps/$(dep)/$(dep).o)) \
+	$(patsubst %.c, %.o, $(wildcard algo/*.c)) \
+	-L./deps/mbedtls/library -lmbedtls -lmbedcrypto -lm -pthread
 
 ifneq ($(shell uname),Darwin)
-  CFLAGS += -static
+  CFLAGS  += -static
 endif
 
 .PHONY: all
@@ -28,12 +24,10 @@ ifneq ($(shell uname),Darwin)
 	upx --best $(TARGET)
 endif
 
+.PHONY: $(TARGET)
 $(TARGET): $(objects)
 	make -C algo
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
-
-%.o: %.c
-	$(CC) -c $(CFLAGS) $<
 
 .PHONY: deps
 deps: $(dependency)
@@ -42,16 +36,16 @@ deps: $(dependency)
 $(dependency):
 	cd deps/$@ && $(MAKE)
 
+.PHONY: clean-deps
+clean-deps:
+	@for dep in $(dependency); do                       \
+		pushd deps/$${dep} && $(MAKE) clean && popd;      \
+	done
+
 .PHONY: clean
 clean:
-	-(cd deps/linenoise && $(MAKE) clean) > /dev/null || true
-	-(cd deps/murmurhash && $(MAKE) clean) > /dev/null || true
-	-(cd deps/mongoose && $(MAKE) clean) > /dev/null || true
-	-(cd deps/mbedtls && $(MAKE) clean) > /dev/null || true
-	-(cd deps/kilo && $(MAKE) clean) > /dev/null || true
-	-(cd deps/uptime && $(MAKE) clean) > /dev/null || true
-	-(cd deps/uuid4 && $(MAKE) clean) > /dev/null || true
-	-($(RM) map *.o algo/*.o)
+	@$(RM) map *.o algo/*.o
+	@$(MAKE) clean-deps
 
 .PHONY: install
 install:
