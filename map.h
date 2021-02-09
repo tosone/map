@@ -21,12 +21,14 @@
 #include <uuid4.h>
 
 #include <2048.h>
-#include <avl.h>
 #include <command.h>
-#include <hashmap.h>
-#include <lru.h>
 #include <pi.h>
 #include <tcp.h>
+
+#include <avl.h>
+#include <hashmap.h>
+#include <lru.h>
+#include <skiplist.h>
 
 #pragma once
 
@@ -89,6 +91,11 @@
 #define COMMAND_AVL_POST "post"
 #define COMMAND_AVL_DUMP "dump"
 
+#define COMMAND_SKLIST "sklist"
+#define COMMAND_SKLIST_SET "set"
+#define COMMAND_SKLIST_GET "get"
+#define COMMAND_SKLIST_DEL "del"
+
 #define ERR_COMMAND "invalid command"
 #define ERR_COMMAND_NOT_FOUND "command not found"
 #define ERR_INTERNAL "internal error"
@@ -119,7 +126,9 @@ bool command_hostname(commands_t commands, int commands_length);
 bool command_game(commands_t commands, int commands_length);
 bool command_pi(commands_t commands, int commands_length);
 bool command_uuid(commands_t commands, int commands_length);
+
 bool command_algorithm(commands_t commands, int commands_length);
 bool command_hmap(commands_t commands, int commands_length);
 bool command_lru(commands_t commands, int commands_length);
 bool command_avl(commands_t commands, int commands_length);
+bool command_sklist(commands_t commands, int commands_length);

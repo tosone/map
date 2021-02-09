@@ -66,6 +66,8 @@ int main(int argc, char **argv) {
           COMMANDS_CHECK(!command_lru(commands, commands_length));
         } else if (strncasecmp(commands[0], COMMAND_AVL, strlen(COMMAND_AVL)) == 0) {
           COMMANDS_CHECK(!command_avl(commands, commands_length));
+        } else if (strncasecmp(commands[0], COMMAND_SKLIST, strlen(COMMAND_SKLIST)) == 0) {
+          COMMANDS_CHECK(!command_sklist(commands, commands_length));
         } else {
           printf("%s\n", ERR_COMMAND_NOT_FOUND);
         }
