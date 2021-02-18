@@ -1,6 +1,6 @@
 #include <map.h>
 
-#define VERSION "v2.3.1"
+#define VERSION "v3.0.0"
 
 #define COMMANDS_CHECK(x)                     \
   if (x) {                                    \
