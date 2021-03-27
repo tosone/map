@@ -1,52 +1,29 @@
 # map
 
-一个类似于 Redis 客户端的命令格式，包含各种简单工具的集合。
+Some useful tools and algorithms playground.
 
-## 命令列表
+## Prerequisites
 
-### Help
+Make sure you have installed all of the following prerequisites on your development machine:
 
-- `help` 获取当前的帮助信息。
+- gcc or clang - Compile the project, on MacOS you should install clang with `xcode-select --install`.
+- make - Build automation tool that automatically builds executable programs and libraries from source code by reading files called Makefiles which specify how to derive the target program.
 
-### Exit
+### MacOS
 
-- `exit` 结束程序。
+``` sh
+xcode-select --install
+brew install make
+```
 
-### Version
+### Ubuntu
 
-- `version` 获取当前版本。
+``` bash
+apt-get install build-essential make
+```
 
-### Base64
+## QA
 
-- `base64 enc <string>` 编码 string 为 base64 字符串。
-- `base64 dec <string>` 解码 base64 字符串。
+- How to convert the dot file to png?
 
-### Hash
-
-- `hash <method> <filename/string>` 对字符串或者文件进行 Hash，支持的 Hash 算法包括：md5、sha1、sha256、sha12。
-
-### Editor
-
-- `vi <filename>` 编辑一个文件。
-
-### Network
-
-- `tcp <ip> <port>` 测试 host 的端口是否通。
-
-### System
-
-- `uname` 获取系统架构信息。
-- `uptime` 获取系统开机多久。
-- `hostname` 获取 hostname。
-
-### Game
-
-- `game <name>` 开始某个游戏。
-
-### Pi
-
-- `pi <length>` 计算 pi 值。
-
-### Random
-
-- `uuid` 产生 UUID。
+  You should install graphviz first, then convert filename.dot to filename.png with `dot -Tpng filename.dot -o filename.png`。
