@@ -496,31 +496,121 @@ void completion(const char *buf, linenoiseCompletions *lc) {
   }
 }
 
+#define ANSI_CODE_RESET "\033[00m"
+#define ANSI_CODE_BOLD "\033[1m"
+#define ANSI_CODE_DARK "\033[2m"
+#define ANSI_CODE_UNDERLINE "\033[4m"
+#define ANSI_CODE_BLINK "\033[5m"
+#define ANSI_CODE_REVERSE "\033[7m"
+#define ANSI_CODE_CONCEALED "\033[8m"
+#define ANSI_CODE_GRAY "\033[30m"
+#define ANSI_CODE_GREY "\033[30m"
+#define ANSI_CODE_RED "\033[31m"
+#define ANSI_CODE_GREEN "\033[32m"
+#define ANSI_CODE_YELLOW "\033[33m"
+#define ANSI_CODE_BLUE "\033[34m"
+#define ANSI_CODE_MAGENTA "\033[35m"
+#define ANSI_CODE_CYAN "\033[36m"
+#define ANSI_CODE_WHITE "\033[37m"
+
 bool command_help(commands_t commands, int commands_length) {
-  printf("Base64\n");
-  printf("  \033[0;32mbase64\033[0m <enc/dec> <string/filename>\n");
-  printf("Hash\n");
-  printf("  \033[0;32mhash\033[0m <method> <string/filename>      "
-         "\033[1;33msupport hash methods: md5 sha1 sha256 sha512\033[0m\n");
-  printf("Editor\n");
-  printf("  \033[0;32mvi\033[0m <filename>\n");
-  printf("Network\n");
-  printf("  \033[0;32mtcp\033[0m <ip> <port>\n");
-  printf("  \033[0;32mserver\033[0m <start/stop> <dir> <port>\n");
-  printf("System\n");
-  printf("  \033[0;32muname\033[0m\n");
-  printf("  \033[0;32muptime\033[0m\n");
-  printf("  \033[0;32mhostname\033[0m\n");
-  printf("Game\n");
-  printf("  \033[0;32mgame\033[0m <name>                          "
-         "\033[1;33msupport game: 2048\033[0m\n");
-  printf("Math\n");
-  printf("  \033[0;32mpi\033[0m <length>\n");
-  printf("Random\n");
-  printf("  \033[0;32muuid\033[0m\n");
-  printf("Map\n");
-  printf("  \033[0;32mhelp\033[0m\n");
-  printf("  \033[0;32mexit\033[0m\n");
-  printf("  \033[0;32mversion\033[0m\n");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "help");
+  printf(ANSI_CODE_YELLOW "\n\tprint help information" ANSI_CODE_RESET "\n");
+
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "exit");
+  printf(ANSI_CODE_YELLOW "\n\texit the application" ANSI_CODE_RESET "\n");
+
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "version");
+  printf(ANSI_CODE_YELLOW "\n\tprint version" ANSI_CODE_RESET "\n\n");
+
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "hmap");
+  printf(" <set> <key> <value>\n");
+  printf(ANSI_CODE_YELLOW "\tadd new key and value to hashmap" ANSI_CODE_RESET "\n");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "hmap");
+  printf(" <get/del> <key>\n");
+  printf(ANSI_CODE_YELLOW "\tget/delete the specific key from hashmap" ANSI_CODE_RESET "\n");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "hmap");
+  printf(" <cap/len>\n");
+  printf(ANSI_CODE_YELLOW "\tget the cap/len from hashmap" ANSI_CODE_RESET "\n");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "hmap");
+  printf(" <print>\n");
+  printf(ANSI_CODE_YELLOW "\tprint all of keys in the hashmap" ANSI_CODE_RESET "\n\n");
+
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "lru");
+  printf(" <set> <key> <value>\n");
+  printf(ANSI_CODE_YELLOW "\tadd new key and value to lru" ANSI_CODE_RESET "\n");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "lru");
+  printf(" <get> <key>\n");
+  printf(ANSI_CODE_YELLOW "\tget the specific key from lru" ANSI_CODE_RESET "\n");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "lru");
+  printf(" <cap/len>\n");
+  printf(ANSI_CODE_YELLOW "\tget the cap/len from lru" ANSI_CODE_RESET "\n");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "lru");
+  printf(" <print>\n");
+  printf(ANSI_CODE_YELLOW "\tprint all of keys in the lru" ANSI_CODE_RESET "\n\n");
+
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "avl");
+  printf(" <set> <key> <value>\n");
+  printf(ANSI_CODE_YELLOW "\tadd new key and value to avl" ANSI_CODE_RESET "\n");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "avl");
+  printf(" <get> <key>\n");
+  printf(ANSI_CODE_YELLOW "\tget the specific key from avl" ANSI_CODE_RESET "\n");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "avl");
+  printf(" <print>\n");
+  printf(ANSI_CODE_YELLOW "\tprint all of keys in the avl" ANSI_CODE_RESET "\n");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "avl");
+  printf(" <in/pre/post>\n");
+  printf(ANSI_CODE_YELLOW "\ttraverse the avl with specific method" ANSI_CODE_RESET "\n");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "avl");
+  printf(" <dump> <filename>\n");
+  printf(ANSI_CODE_YELLOW "\tdump the avl to dot file" ANSI_CODE_RESET "\n\n");
+
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "sklist");
+  printf(" <set> <key> <value>\n");
+  printf(ANSI_CODE_YELLOW "\tadd new key and value to sklist" ANSI_CODE_RESET "\n");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "sklist");
+  printf(" <get/del> <key>\n");
+  printf(ANSI_CODE_YELLOW "\tget/delete the specific key from sklist" ANSI_CODE_RESET "\n\n");
+
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "base64");
+  printf(" <enc/dec> <string/filename>\n");
+  printf(ANSI_CODE_YELLOW "\tbase64 decode/encode string/file" ANSI_CODE_RESET "\n\n");
+
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "hash");
+  printf(" <method> <string/filename>\n");
+  printf(ANSI_CODE_YELLOW "\thash string/file, support methods: md5 sha1 sha256 sha512" ANSI_CODE_RESET "\n\n");
+
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "vi");
+  printf(" <filename>\n");
+  printf(ANSI_CODE_YELLOW "\tedit file like vim" ANSI_CODE_RESET "\n\n");
+
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "tcp");
+  printf(" <ip> <port>\n");
+  printf(ANSI_CODE_YELLOW "\ttest ip:port is reachable or not" ANSI_CODE_RESET "\n\n");
+
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "server");
+  printf(" <start/stop> <dir> <port>\n");
+  printf(ANSI_CODE_YELLOW "\tserve the dir at 0.0.0.0:port" ANSI_CODE_RESET "\n\n");
+
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "pi");
+  printf(" <length>\n");
+  printf(ANSI_CODE_YELLOW "\tcalculate the pi to specific length" ANSI_CODE_RESET "\n\n");
+
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "uuid");
+  printf(ANSI_CODE_YELLOW "\n\tgenerate a valid uuid string" ANSI_CODE_RESET "\n");
+
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "uname");
+  printf(ANSI_CODE_YELLOW "\n\tlike linux uname output" ANSI_CODE_RESET "\n");
+
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "uptime");
+  printf(ANSI_CODE_YELLOW "\n\tlike linux uptime output" ANSI_CODE_RESET "\n");
+
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "hostname");
+  printf(ANSI_CODE_YELLOW "\n\tlike linux hostname output" ANSI_CODE_RESET "\n");
+
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "game");
+  printf(" <name>\n");
+  printf(ANSI_CODE_YELLOW "\tplay some games,  support: 2048" ANSI_CODE_RESET "\n");
+
   return MAP_COMMANDS_OK;
 }

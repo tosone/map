@@ -44,9 +44,9 @@
 #define COMMAND_HMAP_PRINT "print"
 
 #define COMMAND_LRU "lru"
-#define COMMAND_LRU_LEN "len"
 #define COMMAND_LRU_GET "get"
 #define COMMAND_LRU_SET "set"
+#define COMMAND_LRU_LEN "len"
 #define COMMAND_LRU_CAP "cap"
 #define COMMAND_LRU_PRINT "print"
 
