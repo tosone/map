@@ -12,15 +12,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: install packages
-        run: sudo apt-get -y -qq install upx
-      - name: make
-        run: make deps && make all && mv map map-linux
+      - name: Build Dockerfile
+        run: docker build -t map:dev .
+      - name: Copy files
+        run: docker run --rm -v $PWD/dist:/map map:dev bash -c "cp /usr/local/bin/map-* /map"
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
           name: map-linux
-          path: ./map-linux
+          path: ./dist/*
           retention-days: 5
   macos-build:
     name: Create MacOS Release
@@ -28,9 +28,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: install packages
-        run: brew install upx
-      - name: make
+      - name: Compile map
         run: make deps && make all && mv map map-macos
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
@@ -53,8 +51,17 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           path: .
-      - name: install packages
-        run: ls -al && ls map-linux
+      - name: Hash file
+        id: hash
+        run: |
+          echo "::set-output name=macos::$(shasum -a 256 map-macos/map-macos | awk '{ print $1 }')"
+          echo "::set-output name=amd64::$(shasum -a 256 map-linux/map-amd64 | awk '{ print $1 }')"
+          echo "::set-output name=i386::$(shasum -a 256 map-linux/map-i386 | awk '{ print $1 }')"
+          echo "::set-output name=arm32v5::$(shasum -a 256 map-linux/map-arm32v5 | awk '{ print $1 }')"
+          echo "::set-output name=arm32v7::$(shasum -a 256 map-linux/map-arm32v7 | awk '{ print $1 }')"
+          echo "::set-output name=arm64v8::$(shasum -a 256 map-linux/map-arm64v8 | awk '{ print $1 }')"
+          echo "::set-output name=ppc64le::$(shasum -a 256 map-linux/map-ppc64le | awk '{ print $1 }')"
+          echo "::set-output name=s390x::$(shasum -a 256 map-linux/map-s390x | awk '{ print $1 }')"
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
@@ -65,24 +72,30 @@ jobs:
           release_name: ${{ github.ref }}
           draft: false
           prerelease: false
-          body: Download asset [`map-linux`](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-linux) or [`map-macos`](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-macos), static compiled, run it anywhere on Linux or MacOS.
-      - name: Upload Linux Release Asset
-        id: upload-linux-release-asset
-        uses: actions/upload-release-asset@v1
+          body: |
+            Download asset which is static compiled, run it anywhere on Linux or MacOS.
+
+            |File|SHA256|
+            |:---|:---|
+            |[map-macos](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-macos)|`${{ steps.hash.outputs.macos }}`|
+            |[map-amd64](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-amd64)|`${{ steps.hash.outputs.amd64 }}`|
+            |[map-i386](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-i386)|`${{ steps.hash.outputs.i386 }}`|
+            |[map-arm32v5](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-arm32v5)|`${{ steps.hash.outputs.arm32v5 }}`|
+            |[map-arm32v7](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-arm32v7)|`${{ steps.hash.outputs.arm32v7 }}`|
+            |[map-arm64v8](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-arm64v8)|`${{ steps.hash.outputs.arm64v8 }}`|
+            |[map-ppc64le](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-ppc64le)|`${{ steps.hash.outputs.ppc64le }}`|
+            |[map-s390x](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-s390x)|`${{ steps.hash.outputs.s390x }}`|
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: map-linux/map-linux
-          asset_name: map-linux
-          asset_content_type: application/octet-stream
-      - name: Upload MacOS Release Asset
-        id: upload-macos-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: map-macos/map-macos
-          asset_name: map-macos
-          asset_content_type: application/octet-stream
+          files: |
+            map-linux/map-amd64
+            map-macos/map-macos
+            map-linux/map-i386
+            map-linux/map-arm32v5
+            map-linux/map-arm32v7
+            map-linux/map-arm64v8
+            map-linux/map-ppc64le
+            map-linux/map-s390x

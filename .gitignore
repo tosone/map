@@ -56,3 +56,4 @@ history.txt
 .DS_Store
 
 deps/gmp/.libs/
+dist/
