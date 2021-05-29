@@ -75,14 +75,14 @@ bool command_sklist(commands_t commands, int commands_length) {
   if (!algorithm) {
     algorithm_init();
   }
-  command_length_check(<, 3);
+  command_length_check( <, 3);
   if (strncasecmp(commands[1], COMMAND_SKLIST_SET, strlen(COMMAND_SKLIST_SET)) == 0) {
-    command_length_check(!=, 4);
+    command_length_check( !=, 4);
     double score = strtod(commands[2], NULL);
     sds ele = sdsnew(commands[3]);
     slInsert(sklist, score, ele);
   } else if (strncasecmp(commands[1], COMMAND_SKLIST_GET, strlen(COMMAND_SKLIST_GET)) == 0) {
-    command_length_check(!=, 4);
+    command_length_check( !=, 4);
     double score = strtod(commands[2], NULL);
     sds ele = sdsnew(commands[3]);
     unsigned long rank = slGetRank(sklist, score, ele);
@@ -98,7 +98,7 @@ bool command_sklist(commands_t commands, int commands_length) {
       printf("%lu\n", rank);
     }
   } else if (strncasecmp(commands[1], COMMAND_SKLIST_DEL, strlen(COMMAND_SKLIST_DEL)) == 0) {
-    command_length_check(!=, 4);
+    command_length_check( !=, 4);
     double score = strtod(commands[2], NULL);
     sds ele = sdsnew(commands[3]);
     int ret = slDelete(sklist, score, ele, NULL);
@@ -114,17 +114,17 @@ bool command_avl(commands_t commands, int commands_length) {
   if (!algorithm) {
     algorithm_init();
   }
-  command_length_check(<, 3);
+  command_length_check( <, 3);
   if (strncasecmp(commands[1], COMMAND_AVL_SET, strlen(COMMAND_AVL_SET)) == 0) {
-    command_length_check(!=, 3);
+    command_length_check( !=, 3);
     int key = atoi(commands[2]);
     avl = avl_set(avl, key);
   } else if (strncasecmp(commands[1], COMMAND_AVL_GET, strlen(COMMAND_AVL_GET)) == 0) {
-    command_length_check(!=, 3);
+    command_length_check( !=, 3);
     int key = atoi(commands[2]);
     printf("%s\n", avl_get(avl, key) ? "true" : "false");
   } else if (strncasecmp(commands[1], COMMAND_AVL_PRINT, strlen(COMMAND_AVL_PRINT)) == 0) {
-    command_length_check(!=, 3);
+    command_length_check( !=, 3);
     if (strncasecmp(commands[2], COMMAND_AVL_PRE, strlen(COMMAND_AVL_PRE)) == 0) {
       avl_pre_order(avl);
     } else if (strncasecmp(commands[2], COMMAND_AVL_IN, strlen(COMMAND_AVL_IN)) == 0) {
@@ -133,7 +133,7 @@ bool command_avl(commands_t commands, int commands_length) {
       avl_post_order(avl);
     }
   } else if (strncasecmp(commands[1], COMMAND_AVL_DUMP, strlen(COMMAND_AVL_DUMP)) == 0) {
-    command_length_check(!=, 3);
+    command_length_check( !=, 3);
     char *filename = commands[2];
     avl_dump(avl, filename);
   }
@@ -144,17 +144,17 @@ bool command_lru(commands_t commands, int commands_length) {
   if (!algorithm) {
     algorithm_init();
   }
-  command_length_check(<, 2);
+  command_length_check( <, 2);
   if (strncasecmp(commands[1], COMMAND_LRU_LEN, strlen(COMMAND_LRU_LEN)) == 0) {
-    command_length_check(!=, 2);
+    command_length_check( !=, 2);
     printf("%d\n", lru->len);
   } else if (strncasecmp(commands[1], COMMAND_LRU_SET, strlen(COMMAND_LRU_SET)) == 0) {
-    command_length_check(!=, 4);
+    command_length_check( !=, 4);
     char *key = commands[2];
     void *value = commands[3];
     LRU_set(lru, key, value, strlen(value) + 1);
   } else if (strncasecmp(commands[1], COMMAND_LRU_GET, strlen(COMMAND_LRU_GET)) == 0) {
-    command_length_check(!=, 3);
+    command_length_check( !=, 3);
     char *key = commands[2];
     size_t value_length = 0;
     char *value = (char *)LRU_get(lru, key, &value_length);
@@ -164,7 +164,7 @@ bool command_lru(commands_t commands, int commands_length) {
       printf("%s\n", value);
     }
   } else if (strncasecmp(commands[1], COMMAND_LRU_CAP, strlen(COMMAND_LRU_CAP)) == 0) {
-    command_length_check(<, 3);
+    command_length_check( <, 3);
     if (strncasecmp(commands[2], COMMAND_LRU_GET, strlen(COMMAND_LRU_GET)) == 0) {
       printf("%d\n", lru->cap);
     } else if (strncasecmp(commands[2], COMMAND_LRU_SET, strlen(COMMAND_LRU_SET)) == 0) {
@@ -176,7 +176,7 @@ bool command_lru(commands_t commands, int commands_length) {
       }
     }
   } else if (strncasecmp(commands[1], COMMAND_LRU_PRINT, strlen(COMMAND_LRU_PRINT)) == 0) {
-    command_length_check(!=, 2);
+    command_length_check( !=, 2);
     LRU_print(lru);
   }
   return MAP_COMMANDS_OK;
@@ -186,20 +186,20 @@ bool command_hmap(commands_t commands, int commands_length) {
   if (!algorithm) {
     algorithm_init();
   }
-  command_length_check(<, 2);
+  command_length_check( <, 2);
   if (strncasecmp(commands[1], COMMAND_HMAP_CAP, strlen(COMMAND_HMAP_CAP)) == 0) {
-    command_length_check(!=, 2);
+    command_length_check( !=, 2);
     printf("%d\n", hmap->cap);
   } else if (strncasecmp(commands[1], COMMAND_HMAP_LEN, strlen(COMMAND_HMAP_LEN)) == 0) {
-    command_length_check(!=, 2);
+    command_length_check( !=, 2);
     printf("%d\n", hmap->len);
   } else if (strncasecmp(commands[1], COMMAND_HMAP_SET, strlen(COMMAND_HMAP_SET)) == 0) {
-    command_length_check(!=, 4);
+    command_length_check( !=, 4);
     char *key = commands[2];
     void *value = commands[3];
     hmap = hashmap_set(hmap, key, value, strlen(value) + 1);
   } else if (strncasecmp(commands[1], COMMAND_HMAP_GET, strlen(COMMAND_HMAP_GET)) == 0) {
-    command_length_check(!=, 3);
+    command_length_check( !=, 3);
     char *key = commands[2];
     size_t value_length = 0;
     char *value = (char *)hashmap_get(hmap, key, &value_length);
@@ -209,11 +209,11 @@ bool command_hmap(commands_t commands, int commands_length) {
       printf("%s\n", value);
     }
   } else if (strncasecmp(commands[1], COMMAND_HMAP_DEL, strlen(COMMAND_HMAP_DEL)) == 0) {
-    command_length_check(!=, 3);
+    command_length_check( !=, 3);
     char *key = commands[2];
     hashmap_del(hmap, key);
   } else if (strncasecmp(commands[1], COMMAND_HMAP_PRINT, strlen(COMMAND_HMAP_PRINT)) == 0) {
-    command_length_check(!=, 2);
+    command_length_check( !=, 2);
     hashmap_print(hmap);
   }
   return MAP_COMMANDS_OK;
@@ -264,7 +264,7 @@ bool command_hostname(commands_t commands, int commands_length) {
 }
 
 bool command_game(commands_t commands, int commands_length) {
-  command_length_check(<, 2);
+  command_length_check( <, 2);
   if (strncasecmp(commands[1], COMMAND_GAME_2048, strlen(COMMAND_GAME_2048)) == 0) {
     game2048(0, NULL);
   }
@@ -305,13 +305,13 @@ void *serve_dir(void *a) {
 }
 
 bool command_server(commands_t commands, int commands_length) {
-  command_length_check(<, 2);
+  command_length_check( <, 2);
   if (strncasecmp(commands[1], COMMAND_SERVER_START, strlen(COMMAND_SERVER_START)) == 0) {
     if (serve_dir_status) {
       printf("server started already\n");
       return MAP_COMMANDS_OK;
     }
-    command_length_check(<, 3);
+    command_length_check( <, 3);
     int port = 8000;
     if (commands_length == 4) {
       port = atoi(commands[3]);
@@ -337,7 +337,7 @@ bool command_server(commands_t commands, int commands_length) {
 }
 
 bool command_tcp(commands_t commands, int commands_length) {
-  command_length_check(!=, 3);
+  command_length_check( !=, 3);
   int port = atoi(commands[2]);
   if (port <= 0) {
     printf("port is invalid\n");
@@ -348,7 +348,7 @@ bool command_tcp(commands_t commands, int commands_length) {
 }
 
 bool command_vi(commands_t commands, int commands_length) {
-  command_length_check(!=, 2);
+  command_length_check( !=, 2);
   char *filename = commands[1];
 
   initEditor();
@@ -368,7 +368,7 @@ bool command_vi(commands_t commands, int commands_length) {
 }
 
 bool command_base64(commands_t commands, int commands_length) {
-  command_length_check(!=, 3);
+  command_length_check( !=, 3);
 
   char *string = commands[2];
   char *instring = NULL;
@@ -409,6 +409,11 @@ bool command_base64(commands_t commands, int commands_length) {
     if (mbedtls_base64_encode((unsigned char *)outstring, olen, &olen, (unsigned char *)instring, strlen(instring)) != 0) {
       map_err(ERR_INTERNAL, "base64 encode with error");
     } else {
+      if (file_exist) {
+        printf("base64 file: %s\n", string);
+      } else {
+        printf("base64 string: %s\n", string);
+      }
       printf("%s\n", outstring);
     }
     free(outstring);
@@ -419,6 +424,11 @@ bool command_base64(commands_t commands, int commands_length) {
     if (mbedtls_base64_decode((unsigned char *)outstring, olen, &olen, (unsigned char *)instring, strlen(instring)) != 0) {
       map_err(ERR_INTERNAL, "base64 encode with error");
     } else {
+      if (file_exist) {
+        printf("base64 file: %s\n", string);
+      } else {
+        printf("base64 string: %s\n", string);
+      }
       printf("%s\n", outstring);
     }
     free(outstring);
@@ -443,7 +453,7 @@ void print_hex(const uint8_t *b, size_t len) {
 }
 
 bool command_hash(commands_t commands, int commands_length) {
-  command_length_check(!=, 3);
+  command_length_check( !=, 3);
   char *hash_name = commands[1];
   char *string = commands[2];
   const mbedtls_md_info_t *md_info = NULL;
@@ -464,12 +474,14 @@ bool command_hash(commands_t commands, int commands_length) {
     if (mbedtls_md_file(md_info, string, outbyte) != 0) {
       map_err(ERR_INTERNAL, "hash file with error");
     } else {
+      printf("hash file: %s\n", string);
       print_hex((uint8_t *)outbyte, hash_size);
     }
   } else {
     if (mbedtls_md(md_info, (unsigned char *)string, strlen(string), outbyte) != 0) {
       map_err(ERR_INTERNAL, "hash string with error");
     } else {
+      printf("hash string: %s\n", string);
       print_hex((uint8_t *)outbyte, hash_size);
     }
   }
