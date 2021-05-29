@@ -1,3 +1,5 @@
+SHELL     := /bin/bash
+
 TARGET     = map
 objects    = $(patsubst %.c, %.o, $(wildcard *.c))
 dependency = linenoise murmurhash mbedtls mongoose kilo uptime uuid4 sds
@@ -11,35 +13,41 @@ LDFLAGS += $(foreach dep, $(dependency), $(if $(findstring $(dep), mbedtls), , .
 	$(patsubst %.c, %.o, $(wildcard algo/*.c)) \
 	-L./deps/mbedtls/library -lmbedtls -lmbedcrypto -lm -pthread
 
+STRIP   := $(CROSS_COMPILE)strip
+
 ifneq ($(shell uname),Darwin)
-  CFLAGS  += -static
+  CFLAGS += -static
+  ifneq ($(ARCH),)
+		TARGET := $(TARGET)-$(ARCH)
+	endif
 endif
 
 .PHONY: all
-all: $(TARGET) upx
-
-.PHONY: upx
-upx:
-ifneq ($(shell uname),Darwin)
-	upx --best $(TARGET)
-endif
+all: $(TARGET)
 
 .PHONY: $(TARGET)
 $(TARGET): $(objects)
-	make -C algo
+	$(MAKE) -C algo
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+ifneq ($(shell uname),Darwin)
+	$(STRIP) --strip-all --remove-section=.comment $@
+endif
 
 .PHONY: deps
-deps: $(dependency)
+deps: $(dependency) mbedtls
 
 .PHONY: $(dependency)
 $(dependency):
-	cd deps/$@ && $(MAKE)
+	@if [[ $@ == mbedtls ]]; then                   \
+		cd deps/$@ && CC=$(CC) $(MAKE) -j8 no_test; \
+	else                                            \
+		cd deps/$@ && CC=$(CC) $(MAKE) -j8;         \
+	fi
 
 .PHONY: clean-deps
 clean-deps:
 	@for dep in $(dependency); do                       \
-		pushd deps/$${dep} && $(MAKE) clean && popd;      \
+		cd deps/$${dep} && $(MAKE) clean && cd ../..;   \
 	done
 
 .PHONY: clean
