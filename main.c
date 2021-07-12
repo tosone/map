@@ -1,4 +1,9 @@
+#include "zlib.h"
+#include <assert.h>
 #include <map.h>
+#include <stdio.h>
+
+#include <string.h> // for strlen
 
 #define VERSION "v3.0.0"
 
@@ -68,6 +73,8 @@ int main(int argc, char **argv) {
           COMMANDS_CHECK(!command_avl(commands, commands_length));
         } else if (strncasecmp(commands[0], COMMAND_SKLIST, strlen(COMMAND_SKLIST)) == 0) {
           COMMANDS_CHECK(!command_sklist(commands, commands_length));
+        } else if (strncasecmp(commands[0], COMMAND_ZIP, strlen(COMMAND_ZIP)) == 0) {
+          COMMANDS_CHECK(!command_zip(commands, commands_length));
         } else {
           printf("%s\n", ERR_COMMAND_NOT_FOUND);
         }

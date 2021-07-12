@@ -2,16 +2,16 @@ SHELL     := /bin/bash
 
 TARGET     = map
 objects    = $(patsubst %.c, %.o, $(wildcard *.c))
-dependency = linenoise murmurhash mbedtls mongoose kilo uptime uuid4 sds
+dependency = linenoise murmurhash mbedtls mongoose kilo uptime uuid4 sds zlib
 
 ifeq ($(PREFIX),)
   PREFIX  := /usr/local
 endif
 
 CFLAGS  += -Os -Wall $(foreach dep, $(dependency), $(if $(findstring $(dep), mbedtls), -I./deps/$(dep)/include, -I./deps/$(dep))) -I./algo -I.
-LDFLAGS += $(foreach dep, $(dependency), $(if $(findstring $(dep), mbedtls), , ./deps/$(dep)/$(dep).o)) \
+LDFLAGS += $(foreach dep, $(dependency), $(if $(findstring $(dep), mbedtls zlib), , ./deps/$(dep)/$(dep).o)) \
 	$(patsubst %.c, %.o, $(wildcard algo/*.c)) \
-	-L./deps/mbedtls/library -lmbedtls -lmbedcrypto -lm -pthread
+	-L./deps/mbedtls/library -lmbedtls -lmbedcrypto -L./deps/zlib -lz -lm -pthread
 
 STRIP   := $(CROSS_COMPILE)strip
 
@@ -38,21 +38,23 @@ deps: $(dependency) mbedtls
 
 .PHONY: $(dependency)
 $(dependency):
-	@if [[ $@ == mbedtls ]]; then                   \
-		cd deps/$@ && CC=$(CC) $(MAKE) -j8 no_test; \
-	else                                            \
-		cd deps/$@ && CC=$(CC) $(MAKE) -j8;         \
+	@if [[ $@ == mbedtls ]]; then                            \
+		cd deps/$@ && CC=$(CC) $(MAKE) -j8 no_test;            \
+	elif [[ $@ == zlib ]]; then                              \
+		cd deps/$@ && CC=$(CC) ./configure && CC=$(CC) make;   \
+	else                                                     \
+		cd deps/$@ && CC=$(CC) $(MAKE) -j8;                    \
 	fi
 
 .PHONY: clean-deps
 clean-deps:
-	@for dep in $(dependency); do                       \
+	@for dep in $(dependency); do                     \
 		cd deps/$${dep} && $(MAKE) clean && cd ../..;   \
 	done
 
 .PHONY: clean
 clean:
-	@$(RM) map *.o algo/*.o
+	@$(RM) map *.o algo/*.o *.out
 	@$(MAKE) clean-deps
 
 .PHONY: install

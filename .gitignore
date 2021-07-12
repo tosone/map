@@ -55,5 +55,4 @@ map
 history.txt
 .DS_Store
 
-deps/gmp/.libs/
-dist/
+deps/zlib/configure.log
