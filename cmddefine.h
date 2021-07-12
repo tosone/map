@@ -63,3 +63,7 @@
 #define COMMAND_SKLIST_SET "set"
 #define COMMAND_SKLIST_GET "get"
 #define COMMAND_SKLIST_DEL "del"
+
+#define COMMAND_ZIP "zip"
+#define COMMAND_ZIP_DEC "dec"
+#define COMMAND_ZIP_ENC "enc"
