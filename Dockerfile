@@ -39,14 +39,14 @@ RUN set -eux; \
     wget -O musl.tgz "https://www.musl-libc.org/releases/musl-$MUSL_VERSION.tar.gz"; \
     \
     export GNUPGHOME="$(mktemp -d)"; \
-    gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys '836489290BB6B70F99FFDA0556BCDB593020450F'; \
+    gpg --batch --keyserver keyserver.ubuntu.com --recv-keys '836489290BB6B70F99FFDA0556BCDB593020450F'; \
     gpg --batch --verify musl.tgz.asc musl.tgz; \
     gpgconf --kill all; \
     rm -rf "$GNUPGHOME" musl.tgz.asc; \
     \
     mkdir /usr/local/src/musl; \
     tar --extract --file musl.tgz --directory /usr/local/src/musl --strip-components 1; \
-    rm musl.tgz 
+    rm musl.tgz
 
 WORKDIR /map
 
@@ -92,7 +92,7 @@ RUN if [ -d musl ]; then rm -rf musl; fi && \
     ARCH=i386 CROSS_COMPILE=i686-linux-gnu- \
     CC=/map/musl/i386/prefix/bin/musl-gcc make deps all && \
     mv map-i386 /usr/local/bin && \
-    \ 
+    \
     mkdir -p musl/ppc64le && cd musl/ppc64le && \
     CROSS_COMPILE=powerpc64le-linux-gnu- TARGET_ARCH=ppc64le CFLAGS=-mlong-double-64 \
     /usr/local/src/musl/configure --disable-shared --prefix=/map/musl/ppc64le/prefix > /dev/null && \

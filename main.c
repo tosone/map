@@ -1,11 +1,9 @@
-#include "zlib.h"
-#include <assert.h>
-#include <map.h>
 #include <stdio.h>
+#include <string.h>
 
-#include <string.h> // for strlen
+#include <map.h>
 
-#define VERSION "v3.0.0"
+#define VERSION "v3.0.3"
 
 #define COMMANDS_CHECK(x)                     \
   if (x) {                                    \
@@ -73,8 +71,10 @@ int main(int argc, char **argv) {
           COMMANDS_CHECK(!command_avl(commands, commands_length));
         } else if (strncasecmp(commands[0], COMMAND_SKLIST, strlen(COMMAND_SKLIST)) == 0) {
           COMMANDS_CHECK(!command_sklist(commands, commands_length));
-        } else if (strncasecmp(commands[0], COMMAND_ZIP, strlen(COMMAND_ZIP)) == 0) {
-          COMMANDS_CHECK(!command_zip(commands, commands_length));
+        } else if (strncasecmp(commands[0], COMMAND_GZIP, strlen(COMMAND_GZIP)) == 0) {
+          COMMANDS_CHECK(!command_gzip(commands, commands_length));
+        } else if (strncasecmp(commands[0], COMMAND_GENPASSWD, strlen(COMMAND_GENPASSWD)) == 0) {
+          COMMANDS_CHECK(!command_genpasswd(commands, commands_length));
         } else {
           printf("%s\n", ERR_COMMAND_NOT_FOUND);
         }

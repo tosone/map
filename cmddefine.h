@@ -64,6 +64,8 @@
 #define COMMAND_SKLIST_GET "get"
 #define COMMAND_SKLIST_DEL "del"
 
-#define COMMAND_ZIP "zip"
-#define COMMAND_ZIP_DEC "dec"
-#define COMMAND_ZIP_ENC "enc"
+#define COMMAND_GZIP "gzip"
+#define COMMAND_GZIP_DEC "dec"
+#define COMMAND_GZIP_ENC "enc"
+
+#define COMMAND_GENPASSWD "genpasswd"
