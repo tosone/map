@@ -56,3 +56,7 @@ history.txt
 .DS_Store
 
 deps/zlib/configure.log
+deps/zlib/example
+deps/zlib/examplesh
+deps/zlib/minigzip
+deps/zlib/minigzipsh

@@ -484,12 +484,23 @@ bool command_uuid(commands_t commands, int commands_length) {
   return MAP_COMMANDS_OK;
 }
 
-bool command_zip(commands_t commands, int commands_length) {
+bool command_genpasswd(commands_t commands, int commands_length) {
+  int length = 10;
+  if (commands_length == 2) {
+    length = atoi(commands[1]);
+  }
+  char *password = genpasswd(length);
+  printf("%s\n", password);
+  free(password);
+  return MAP_COMMANDS_OK;
+}
+
+bool command_gzip(commands_t commands, int commands_length) {
   command_length_check(!=, 4);
 
   char *in = commands[2];
   char *out = commands[3];
-  if (strncasecmp(commands[1], COMMAND_ZIP_ENC, strlen(COMMAND_ZIP_ENC)) == 0) {
+  if (strncasecmp(commands[1], COMMAND_GZIP_ENC, strlen(COMMAND_GZIP_ENC)) == 0) {
     FILE *f = NULL;
     struct stat file_handler;
     if (stat(in, &file_handler) == 0) {
@@ -505,7 +516,7 @@ bool command_zip(commands_t commands, int commands_length) {
     } else {
       return MAP_COMMANDS_OK;
     }
-  } else if (strncasecmp(commands[1], COMMAND_ZIP_DEC, strlen(COMMAND_ZIP_DEC)) == 0) {
+  } else if (strncasecmp(commands[1], COMMAND_GZIP_DEC, strlen(COMMAND_GZIP_DEC)) == 0) {
     FILE *f = NULL;
     struct stat file_handler;
     if (stat(in, &file_handler) == 0) {
@@ -551,101 +562,108 @@ void completion(const char *buf, linenoiseCompletions *lc) {
 #define ANSI_CODE_WHITE "\033[37m"
 
 bool command_help(commands_t commands, int commands_length) {
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "help");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_HELP);
   printf(ANSI_CODE_YELLOW "\n\tprint help information" ANSI_CODE_RESET "\n");
 
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "exit");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_EXIT);
   printf(ANSI_CODE_YELLOW "\n\texit the application" ANSI_CODE_RESET "\n");
 
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "version");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_EXIT);
   printf(ANSI_CODE_YELLOW "\n\tprint version" ANSI_CODE_RESET "\n\n");
 
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "hmap");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_HMAP);
   printf(" <set> <key> <value>\n");
   printf(ANSI_CODE_YELLOW "\tadd new key and value to hashmap" ANSI_CODE_RESET "\n");
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "hmap");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_HMAP);
   printf(" <get/del> <key>\n");
   printf(ANSI_CODE_YELLOW "\tget/delete the specific key from hashmap" ANSI_CODE_RESET "\n");
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "hmap");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_HMAP);
   printf(" <cap/len>\n");
   printf(ANSI_CODE_YELLOW "\tget the cap/len from hashmap" ANSI_CODE_RESET "\n");
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "hmap");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_HMAP);
   printf(" <print>\n");
   printf(ANSI_CODE_YELLOW "\tprint all of keys in the hashmap" ANSI_CODE_RESET "\n\n");
 
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "lru");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_LRU);
   printf(" <set> <key> <value>\n");
   printf(ANSI_CODE_YELLOW "\tadd new key and value to lru" ANSI_CODE_RESET "\n");
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "lru");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_LRU);
   printf(" <get> <key>\n");
   printf(ANSI_CODE_YELLOW "\tget the specific key from lru" ANSI_CODE_RESET "\n");
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "lru");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_LRU);
   printf(" <cap/len>\n");
   printf(ANSI_CODE_YELLOW "\tget the cap/len from lru" ANSI_CODE_RESET "\n");
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "lru");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_LRU);
   printf(" <print>\n");
   printf(ANSI_CODE_YELLOW "\tprint all of keys in the lru" ANSI_CODE_RESET "\n\n");
 
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "avl");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_AVL);
   printf(" <set> <key> <value>\n");
   printf(ANSI_CODE_YELLOW "\tadd new key and value to avl" ANSI_CODE_RESET "\n");
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "avl");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_AVL);
   printf(" <get> <key>\n");
   printf(ANSI_CODE_YELLOW "\tget the specific key from avl" ANSI_CODE_RESET "\n");
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "avl");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_AVL);
   printf(" <print>\n");
   printf(ANSI_CODE_YELLOW "\tprint all of keys in the avl" ANSI_CODE_RESET "\n");
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "avl");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_AVL);
   printf(" <in/pre/post>\n");
   printf(ANSI_CODE_YELLOW "\ttraverse the avl with specific method" ANSI_CODE_RESET "\n");
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "avl");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_AVL);
   printf(" <dump> <filename>\n");
   printf(ANSI_CODE_YELLOW "\tdump the avl to dot file" ANSI_CODE_RESET "\n\n");
 
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "sklist");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_SKLIST);
   printf(" <set> <key> <value>\n");
   printf(ANSI_CODE_YELLOW "\tadd new key and value to sklist" ANSI_CODE_RESET "\n");
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "sklist");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_SKLIST);
   printf(" <get/del> <key>\n");
   printf(ANSI_CODE_YELLOW "\tget/delete the specific key from sklist" ANSI_CODE_RESET "\n\n");
 
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "base64");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_BASE64);
   printf(" <enc/dec> <string/filename>\n");
   printf(ANSI_CODE_YELLOW "\tbase64 decode/encode string/file" ANSI_CODE_RESET "\n\n");
 
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "hash");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_HASH);
   printf(" <method> <string/filename>\n");
   printf(ANSI_CODE_YELLOW "\thash string/file, support methods: md5 sha1 sha256 sha512" ANSI_CODE_RESET "\n\n");
 
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "vi");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_GZIP);
+  printf(" <enc/dec> <filename> <filename>\n");
+  printf(ANSI_CODE_YELLOW "\tgzip compress or decompress file" ANSI_CODE_RESET "\n\n");
+
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_VI);
   printf(" <filename>\n");
   printf(ANSI_CODE_YELLOW "\tedit file like vim" ANSI_CODE_RESET "\n\n");
 
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "tcp");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_TCP);
   printf(" <ip> <port>\n");
   printf(ANSI_CODE_YELLOW "\ttest ip:port is reachable or not" ANSI_CODE_RESET "\n\n");
 
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "server");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_SERVER);
   printf(" <start/stop> <dir> <port>\n");
   printf(ANSI_CODE_YELLOW "\tserve the dir at 0.0.0.0:port" ANSI_CODE_RESET "\n\n");
 
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "pi");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_PI);
   printf(" <length>\n");
   printf(ANSI_CODE_YELLOW "\tcalculate the pi to specific length" ANSI_CODE_RESET "\n\n");
 
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "uuid");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_UUID);
   printf(ANSI_CODE_YELLOW "\n\tgenerate a valid uuid string" ANSI_CODE_RESET "\n");
 
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "uname");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_GENPASSWD);
+  printf(ANSI_CODE_YELLOW "\n\tgenerate a password" ANSI_CODE_RESET "\n");
+
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_UNAME);
   printf(ANSI_CODE_YELLOW "\n\tlike linux uname output" ANSI_CODE_RESET "\n");
 
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "uptime");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_UPTIME);
   printf(ANSI_CODE_YELLOW "\n\tlike linux uptime output" ANSI_CODE_RESET "\n");
 
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "hostname");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_HOSTNAME);
   printf(ANSI_CODE_YELLOW "\n\tlike linux hostname output" ANSI_CODE_RESET "\n");
 
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, "game");
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_GAME);
   printf(" <name>\n");
   printf(ANSI_CODE_YELLOW "\tplay some games,  support: 2048" ANSI_CODE_RESET "\n");
 
