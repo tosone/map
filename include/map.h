@@ -29,11 +29,6 @@
 #include <pi.h>
 #include <tcp.h>
 
-#include <avl.h>
-#include <hashmap.h>
-#include <lru.h>
-#include <skiplist.h>
-
 #pragma once
 
 #define ERR_COMMAND "invalid command"
@@ -68,9 +63,3 @@ bool command_pi(commands_t commands, int commands_length);
 bool command_uuid(commands_t commands, int commands_length);
 bool command_gzip(commands_t commands, int commands_length);
 bool command_genpasswd(commands_t commands, int commands_length);
-
-bool command_algorithm(commands_t commands, int commands_length);
-bool command_hmap(commands_t commands, int commands_length);
-bool command_lru(commands_t commands, int commands_length);
-bool command_avl(commands_t commands, int commands_length);
-bool command_sklist(commands_t commands, int commands_length);

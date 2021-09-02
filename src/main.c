@@ -11,6 +11,9 @@
     continue;                                 \
   }
 
+const char *hostory_file = "history.txt";
+const char *prompt = "\x1b[1;32mmap\x1b[0m> ";
+
 int main(int argc, char **argv) {
   linenoiseSetCompletionCallback(completion);
   linenoiseHistoryLoad("history.txt");
@@ -19,7 +22,7 @@ int main(int argc, char **argv) {
   atexit(clear);
 
   char *line;
-  while ((line = linenoise("map> ")) != NULL) {
+  while ((line = linenoise(prompt)) != NULL) {
     if (line[0] != '\0') {
       linenoiseHistoryAdd(line);
       linenoiseHistorySave("history.txt");
@@ -61,16 +64,6 @@ int main(int argc, char **argv) {
           COMMANDS_CHECK(!command_pi(commands, commands_length));
         } else if (strncasecmp(commands[0], COMMAND_UUID, strlen(COMMAND_UUID)) == 0) {
           COMMANDS_CHECK(!command_uuid(commands, commands_length));
-        } else if (strncasecmp(commands[0], COMMAND_ALGORITHM, strlen(COMMAND_ALGORITHM)) == 0) {
-          COMMANDS_CHECK(!command_algorithm(commands, commands_length));
-        } else if (strncasecmp(commands[0], COMMAND_HMAP, strlen(COMMAND_HMAP)) == 0) {
-          COMMANDS_CHECK(!command_hmap(commands, commands_length));
-        } else if (strncasecmp(commands[0], COMMAND_LRU, strlen(COMMAND_LRU)) == 0) {
-          COMMANDS_CHECK(!command_lru(commands, commands_length));
-        } else if (strncasecmp(commands[0], COMMAND_AVL, strlen(COMMAND_AVL)) == 0) {
-          COMMANDS_CHECK(!command_avl(commands, commands_length));
-        } else if (strncasecmp(commands[0], COMMAND_SKLIST, strlen(COMMAND_SKLIST)) == 0) {
-          COMMANDS_CHECK(!command_sklist(commands, commands_length));
         } else if (strncasecmp(commands[0], COMMAND_GZIP, strlen(COMMAND_GZIP)) == 0) {
           COMMANDS_CHECK(!command_gzip(commands, commands_length));
         } else if (strncasecmp(commands[0], COMMAND_GENPASSWD, strlen(COMMAND_GENPASSWD)) == 0) {
