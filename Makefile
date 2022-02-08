@@ -52,7 +52,7 @@ clean-deps:
 
 .PHONY: clean
 clean:
-	@$(RM) map *.o *.out
+	@$(RM) map src/*.o *.out
 	@$(MAKE) clean-deps
 
 .PHONY: install
