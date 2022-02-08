@@ -19,7 +19,6 @@ struct mg_http_serve_opts *serve_dir_root = NULL;
 void clear() {
   if (serve_dir_status) {
     serve_dir_status = false;
-    mg_usleep(2 * 1e6);
   }
   if (serve_dir_root != NULL) {
     free(serve_dir_root);
