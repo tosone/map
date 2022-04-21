@@ -1,6 +1,6 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
-ENV MUSL_VERSION 1.2.2
+ENV MUSL_VERSION 1.2.3
 
 RUN set -eux; \
     # sed -i "s/deb.debian.org/mirrors.aliyun.com/g" /etc/apt/sources.list && \
