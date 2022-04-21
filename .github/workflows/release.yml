@@ -24,7 +24,7 @@ jobs:
           retention-days: 5
   macos-build:
     name: Create MacOS Release
-    runs-on: macos-11.0
+    runs-on: macos-11
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -62,6 +62,17 @@ jobs:
           echo "::set-output name=arm64v8::$(shasum -a 256 map-linux/map-arm64v8 | awk '{ print $1 }')"
           echo "::set-output name=ppc64le::$(shasum -a 256 map-linux/map-ppc64le | awk '{ print $1 }')"
           echo "::set-output name=s390x::$(shasum -a 256 map-linux/map-s390x | awk '{ print $1 }')"
+      - name: Size
+        id: size
+        run: |
+          echo "::set-output name=macos::$(ls -lh map-macos/map-macos | awk '{print  $5}')"
+          echo "::set-output name=amd64::$(ls -lh map-linux/map-amd64 | awk '{print  $5}')"
+          echo "::set-output name=i386::$(ls -lh map-linux/map-i386 | awk '{print  $5}')"
+          echo "::set-output name=arm32v5::$(ls -lh map-linux/map-arm32v5 | awk '{print  $5}')"
+          echo "::set-output name=arm32v7::$(ls -lh map-linux/map-arm32v7 | awk '{print  $5}')"
+          echo "::set-output name=arm64v8::$(ls -lh map-linux/map-arm64v8 | awk '{print  $5}')"
+          echo "::set-output name=ppc64le::$(ls -lh map-linux/map-ppc64le | awk '{print  $5}')"
+          echo "::set-output name=s390x::$(ls -lh map-linux/map-s390x | awk '{print  $5}')"
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
@@ -75,16 +86,16 @@ jobs:
           body: |
             Download asset which is static compiled, run it anywhere on Linux or MacOS.
 
-            |File|SHA256|
-            |:---|:---|
-            |[map-macos](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-macos)|`${{ steps.hash.outputs.macos }}`|
-            |[map-amd64](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-amd64)|`${{ steps.hash.outputs.amd64 }}`|
-            |[map-i386](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-i386)|`${{ steps.hash.outputs.i386 }}`|
-            |[map-arm32v5](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-arm32v5)|`${{ steps.hash.outputs.arm32v5 }}`|
-            |[map-arm32v7](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-arm32v7)|`${{ steps.hash.outputs.arm32v7 }}`|
-            |[map-arm64v8](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-arm64v8)|`${{ steps.hash.outputs.arm64v8 }}`|
-            |[map-ppc64le](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-ppc64le)|`${{ steps.hash.outputs.ppc64le }}`|
-            |[map-s390x](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-s390x)|`${{ steps.hash.outputs.s390x }}`|
+            |File|Size|SHA256|
+            |:---|:---|:---|
+            |[map-macos](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-macos)|${{ steps.size.outputs.macos }}|`${{ steps.hash.outputs.macos }}`|
+            |[map-amd64](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-amd64)|${{ steps.size.outputs.amd64 }}|`${{ steps.hash.outputs.amd64 }}`|
+            |[map-i386](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-i386)|${{ steps.size.outputs.i386 }}|`${{ steps.hash.outputs.i386 }}`|
+            |[map-arm32v5](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-arm32v5)|${{ steps.size.outputs.arm32v5 }}|`${{ steps.hash.outputs.arm32v5 }}`|
+            |[map-arm32v7](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-arm32v7)|${{ steps.size.outputs.arm32v7 }}|`${{ steps.hash.outputs.arm32v7 }}`|
+            |[map-arm64v8](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-arm64v8)|${{ steps.size.outputs.arm64v8 }}|`${{ steps.hash.outputs.arm64v8 }}`|
+            |[map-ppc64le](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-ppc64le)|${{ steps.size.outputs.ppc64le }}|`${{ steps.hash.outputs.ppc64le }}`|
+            |[map-s390x](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-s390x)|${{ steps.size.outputs.s390x }}|`${{ steps.hash.outputs.s390x }}`|
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v1
         env:
