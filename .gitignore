@@ -52,7 +52,6 @@ Mkfile.old
 dkms.conf
 
 map
-history.txt
 .DS_Store
 
 deps/zlib/configure.log

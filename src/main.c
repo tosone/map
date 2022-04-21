@@ -1,5 +1,8 @@
+#include <pwd.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <map.h>
 
@@ -11,12 +14,22 @@
     continue;                                 \
   }
 
-const char *hostory_file = "history.txt";
-const char *prompt = "\x1b[1;32mmap\x1b[0m> ";
+const char *hostory_filename = ".map_history";
+const char *prompt = "map> ";
 
 int main(int argc, char **argv) {
   linenoiseSetCompletionCallback(completion);
-  linenoiseHistoryLoad("history.txt");
+
+  struct passwd *pw = getpwuid(getuid());
+  const char *homedir = pw->pw_dir;
+  char *history_file = (char *)malloc(strlen(homedir) + strlen(hostory_filename) + 2);
+  bzero(history_file, strlen(homedir) + strlen(hostory_filename) + 2);
+  strcpy(history_file, homedir);
+  strcat(history_file + strlen(homedir), "/");
+  strcpy(history_file + strlen(homedir) + 1, hostory_filename);
+  printf("history file: %s\n", history_file);
+
+  linenoiseHistoryLoad(history_file);
   linenoiseHistorySetMaxLen(1000);
 
   atexit(clear);
@@ -25,7 +38,7 @@ int main(int argc, char **argv) {
   while ((line = linenoise(prompt)) != NULL) {
     if (line[0] != '\0') {
       linenoiseHistoryAdd(line);
-      linenoiseHistorySave("history.txt");
+      linenoiseHistorySave(history_file);
 
       char *line_copy = (char *)malloc(sizeof(char) * (strlen(line) + 1));
       memcpy(line_copy, line, strlen(line) + 1);
