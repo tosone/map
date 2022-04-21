@@ -27,7 +27,6 @@ int main(int argc, char **argv) {
   strcpy(history_file, homedir);
   strcat(history_file + strlen(homedir), "/");
   strcpy(history_file + strlen(homedir) + 1, hostory_filename);
-  printf("history file: %s\n", history_file);
 
   linenoiseHistoryLoad(history_file);
   linenoiseHistorySetMaxLen(1000);
