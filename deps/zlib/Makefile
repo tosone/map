@@ -18,26 +18,26 @@
 
 CC=cc
 
-CFLAGS=-O3 -DHAVE_HIDDEN
+CFLAGS=-O
 #CFLAGS=-O -DMAX_WBITS=14 -DMAX_MEM_LEVEL=7
 #CFLAGS=-g -DZLIB_DEBUG
 #CFLAGS=-O3 -Wall -Wwrite-strings -Wpointer-arith -Wconversion \
 #           -Wstrict-prototypes -Wmissing-prototypes
 
-SFLAGS=-O3 -fPIC -DHAVE_HIDDEN
+SFLAGS=-O
 LDFLAGS=
 TEST_LDFLAGS=-L. libz.a
-LDSHARED=cc -dynamiclib -install_name ${exec_prefix}/lib/libz.1.dylib -compatibility_version 1 -current_version 1.2.11
+LDSHARED=cc -shared
 CPP=cc -E
 
 STATICLIB=libz.a
-SHAREDLIB=libz.dylib
-SHAREDLIBV=libz.1.2.11.dylib
-SHAREDLIBM=libz.1.dylib
+SHAREDLIB=libz.so
+SHAREDLIBV=libz.so.1.2.12
+SHAREDLIBM=libz.so.1
 LIBS=$(STATICLIB) $(SHAREDLIBV)
 
-AR=libtool
-ARFLAGS=-o
+AR=ar
+ARFLAGS=rc
 RANLIB=ranlib
 LDCONFIG=ldconfig
 LDSHAREDLIBC=-lc
@@ -91,8 +91,8 @@ teststatic: static
 	  echo '		*** zlib test OK ***'; \
 	else \
 	  echo '		*** zlib test FAILED ***'; false; \
-	fi; \
-	rm -f $$TMPST
+	fi
+	@rm -f tmpst_$$
 
 testshared: shared
 	@LD_LIBRARY_PATH=`pwd`:$(LD_LIBRARY_PATH) ; export LD_LIBRARY_PATH; \
@@ -104,8 +104,8 @@ testshared: shared
 	  echo '		*** zlib shared test OK ***'; \
 	else \
 	  echo '		*** zlib shared test FAILED ***'; false; \
-	fi; \
-	rm -f $$TMPSH
+	fi
+	@rm -f tmpsh_$$
 
 test64: all64
 	@TMP64=tmp64_$$; \
@@ -113,8 +113,8 @@ test64: all64
 	  echo '		*** zlib 64-bit test OK ***'; \
 	else \
 	  echo '		*** zlib 64-bit test FAILED ***'; false; \
-	fi; \
-	rm -f $$TMP64
+	fi
+	@rm -f tmp64_$$
 
 infcover.o: $(SRCDIR)test/infcover.c $(SRCDIR)zlib.h zconf.h
 	$(CC) $(CFLAGS) $(ZINCOUT) -c -o $@ $(SRCDIR)test/infcover.c
@@ -376,15 +376,13 @@ clean:
 	rm -f contrib/infback9/*.gcda contrib/infback9/*.gcno contrib/infback9/*.gcov
 
 maintainer-clean: distclean
-distclean: clean zconf zconf.h.cmakein docs
+distclean: clean zconf zconf.h.cmakein
 	rm -f Makefile zlib.pc configure.log
 	-@rm -f .DS_Store
 	@if [ -f Makefile.in ]; then \
 	printf 'all:\n\t-@echo "Please use ./configure first.  Thank you."\n' > Makefile ; \
 	printf '\ndistclean:\n\tmake -f Makefile.in distclean\n' >> Makefile ; \
 	touch -r $(SRCDIR)Makefile.in Makefile ; fi
-	@if [ ! -f zconf.h.in ]; then rm -f zconf.h zconf.h.cmakein ; fi
-	@if [ ! -f zlib.3 ]; then rm -f zlib.3.pdf ; fi
 
 tags:
 	etags $(SRCDIR)*.[ch]
