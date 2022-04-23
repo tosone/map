@@ -39,7 +39,7 @@ $(dependency):
 	@if [[ $@ == mbedtls ]]; then                            \
 		cd deps/$@ && CC=$(CC) $(MAKE) -j8 lib;            \
 	elif [[ $@ == zlib ]]; then                              \
-		cd deps/$@ && CC=$(CC) ./configure && CC=$(CC) make;   \
+		cd deps/$@ && CC=$(CC) ./configure --static && CC=$(CC) make;   \
 	else                                                     \
 		cd deps/$@ && CC=$(CC) $(MAKE) -j8;                    \
 	fi
