@@ -217,6 +217,12 @@ bool command_base64(commands_t commands, int commands_length) {
     if (mbedtls_base64_encode((unsigned char *)outstring, olen, &olen, (unsigned char *)instring, strlen(instring)) != 0) {
       map_err(ERR_INTERNAL, "base64 encode with error");
     } else {
+      if (file_exist) {
+        printf("base64 file: %s\n", string);
+      }
+      // else {
+      //   printf("base64 string: %s\n", string);
+      // }
       printf("%s\n", outstring);
     }
     free(outstring);
@@ -227,6 +233,12 @@ bool command_base64(commands_t commands, int commands_length) {
     if (mbedtls_base64_decode((unsigned char *)outstring, olen, &olen, (unsigned char *)instring, strlen(instring)) != 0) {
       map_err(ERR_INTERNAL, "base64 encode with error");
     } else {
+      if (file_exist) {
+        printf("base64 file: %s\n", string);
+      }
+      // else {
+      //   printf("base64 string: %s\n", string);
+      // }
       printf("%s\n", outstring);
     }
     free(outstring);
