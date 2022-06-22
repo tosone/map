@@ -394,7 +394,7 @@ bool command_help(commands_t commands, int commands_length) {
   printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_EXIT);
   printf(ANSI_CODE_YELLOW "\n\texit the application" ANSI_CODE_RESET "\n");
 
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_EXIT);
+  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_VERSION);
   printf(ANSI_CODE_YELLOW "\n\tprint version" ANSI_CODE_RESET "\n\n");
 
   printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_BASE64);
