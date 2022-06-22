@@ -25,15 +25,15 @@ CFLAGS=-O
 #           -Wstrict-prototypes -Wmissing-prototypes
 
 SFLAGS=-O
-LDFLAGS=
+LDFLAGS=-L/usr/local/opt/python@3.7/lib   ./deps/linenoise/linenoise.o      ./deps/mongoose/mongoose.o   ./deps/kilo/kilo.o   ./deps/uptime/uptime.o   ./deps/uuid4/uuid4.o    -L./deps/mbedtls/library -lmbedtls -lmbedcrypto -L./deps/zlib -lz -lm -pthread
 TEST_LDFLAGS=-L. libz.a
-LDSHARED=cc -shared
+LDSHARED=cc
 CPP=cc -E
 
 STATICLIB=libz.a
-SHAREDLIB=libz.so
-SHAREDLIBV=libz.so.1.2.12
-SHAREDLIBM=libz.so.1
+SHAREDLIB=
+SHAREDLIBV=
+SHAREDLIBM=
 LIBS=$(STATICLIB) $(SHAREDLIBV)
 
 AR=ar
@@ -73,7 +73,7 @@ OBJS = $(OBJC) $(OBJA)
 
 PIC_OBJS = $(PIC_OBJC) $(PIC_OBJA)
 
-all: static shared
+all: static
 
 static: example$(EXE) minigzip$(EXE)
 
@@ -83,7 +83,7 @@ all64: example64$(EXE) minigzip64$(EXE)
 
 check: test
 
-test: all teststatic testshared
+test: all teststatic
 
 teststatic: static
 	@TMPST=tmpst_$$; \
