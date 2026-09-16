@@ -8,105 +8,84 @@ name: Create Release
 jobs:
   linux-build:
     name: Create Linux Release
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+
       - name: Build Dockerfile
         run: docker build -t map:dev .
-      - name: Copy files
-        run: docker run --rm -v $PWD/dist:/map map:dev bash -c "cp /usr/local/bin/map-* /map"
+
+      # docker cp only works on containers: create one from the image without
+      # starting it, copy the two static binaries out of /usr/local/bin, then
+      # remove the container.
+      - name: Copy files out of the image
+        run: |
+          mkdir -p dist
+          container=$(docker create map:dev)
+          docker cp "$container:/usr/local/bin/map-amd64" dist/map-amd64
+          docker cp "$container:/usr/local/bin/map-arm64v8" dist/map-arm64v8
+          docker rm "$container"
+          ls -lh dist
+
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: map-linux
           path: ./dist/*
           retention-days: 5
-  macos-build:
-    name: Create MacOS Release
-    runs-on: macos-11
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Compile map
-        run: make deps && make all && mv map map-macos
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: map-macos
-          path: map-macos
-          retention-days: 5
+
   create-github-release:
     needs:
       - linux-build
-      - macos-build
     name: Create GitHub Release
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # git describe needs the tags
+
       - name: Set env
-        run: echo "GIT_TAG=`echo $(git describe --tags --abbrev=0)`" >> $GITHUB_ENV
+        run: echo "GIT_TAG=$(git describe --tags --abbrev=0)" >> "$GITHUB_ENV"
+
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           path: .
+
       - name: Hash file
         id: hash
         run: |
-          echo "::set-output name=macos::$(shasum -a 256 map-macos/map-macos | awk '{ print $1 }')"
-          echo "::set-output name=amd64::$(shasum -a 256 map-linux/map-amd64 | awk '{ print $1 }')"
-          echo "::set-output name=i386::$(shasum -a 256 map-linux/map-i386 | awk '{ print $1 }')"
-          echo "::set-output name=arm32v5::$(shasum -a 256 map-linux/map-arm32v5 | awk '{ print $1 }')"
-          echo "::set-output name=arm32v7::$(shasum -a 256 map-linux/map-arm32v7 | awk '{ print $1 }')"
-          echo "::set-output name=arm64v8::$(shasum -a 256 map-linux/map-arm64v8 | awk '{ print $1 }')"
-          echo "::set-output name=ppc64le::$(shasum -a 256 map-linux/map-ppc64le | awk '{ print $1 }')"
-          echo "::set-output name=s390x::$(shasum -a 256 map-linux/map-s390x | awk '{ print $1 }')"
+          echo "amd64=$(sha256sum map-linux/map-amd64 | awk '{ print $1 }')" >> "$GITHUB_OUTPUT"
+          echo "arm64v8=$(sha256sum map-linux/map-arm64v8 | awk '{ print $1 }')" >> "$GITHUB_OUTPUT"
+
       - name: Size
         id: size
         run: |
-          echo "::set-output name=macos::$(ls -lh map-macos/map-macos | awk '{print  $5}')"
-          echo "::set-output name=amd64::$(ls -lh map-linux/map-amd64 | awk '{print  $5}')"
-          echo "::set-output name=i386::$(ls -lh map-linux/map-i386 | awk '{print  $5}')"
-          echo "::set-output name=arm32v5::$(ls -lh map-linux/map-arm32v5 | awk '{print  $5}')"
-          echo "::set-output name=arm32v7::$(ls -lh map-linux/map-arm32v7 | awk '{print  $5}')"
-          echo "::set-output name=arm64v8::$(ls -lh map-linux/map-arm64v8 | awk '{print  $5}')"
-          echo "::set-output name=ppc64le::$(ls -lh map-linux/map-ppc64le | awk '{print  $5}')"
-          echo "::set-output name=s390x::$(ls -lh map-linux/map-s390x | awk '{print  $5}')"
+          echo "amd64=$(ls -lh map-linux/map-amd64 | awk '{ print $5 }')" >> "$GITHUB_OUTPUT"
+          echo "arm64v8=$(ls -lh map-linux/map-arm64v8 | awk '{ print $5 }')" >> "$GITHUB_OUTPUT"
+
+      # this action creates the release and uploads the assets in one step;
+      # actions/create-release has been archived since 2021 and a second
+      # action was used only to upload the files
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@latest
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
           draft: false
           prerelease: false
+          fail_on_unmatched_files: true
           body: |
-            Download asset which is static compiled, run it anywhere on Linux or MacOS.
+            Download asset which is static compiled, run it anywhere on Linux.
 
             |File|Size|SHA256|
             |:---|:---|:---|
-            |[map-macos](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-macos)|${{ steps.size.outputs.macos }}|`${{ steps.hash.outputs.macos }}`|
             |[map-amd64](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-amd64)|${{ steps.size.outputs.amd64 }}|`${{ steps.hash.outputs.amd64 }}`|
-            |[map-i386](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-i386)|${{ steps.size.outputs.i386 }}|`${{ steps.hash.outputs.i386 }}`|
-            |[map-arm32v5](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-arm32v5)|${{ steps.size.outputs.arm32v5 }}|`${{ steps.hash.outputs.arm32v5 }}`|
-            |[map-arm32v7](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-arm32v7)|${{ steps.size.outputs.arm32v7 }}|`${{ steps.hash.outputs.arm32v7 }}`|
             |[map-arm64v8](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-arm64v8)|${{ steps.size.outputs.arm64v8 }}|`${{ steps.hash.outputs.arm64v8 }}`|
-            |[map-ppc64le](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-ppc64le)|${{ steps.size.outputs.ppc64le }}|`${{ steps.hash.outputs.ppc64le }}`|
-            |[map-s390x](https://github.com/tosone/map/releases/download/${{ env.GIT_TAG }}/map-s390x)|${{ steps.size.outputs.s390x }}|`${{ steps.hash.outputs.s390x }}`|
-      - name: Upload Release Asset
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-        with:
           files: |
             map-linux/map-amd64
-            map-macos/map-macos
-            map-linux/map-i386
-            map-linux/map-arm32v5
-            map-linux/map-arm32v7
             map-linux/map-arm64v8
-            map-linux/map-ppc64le
-            map-linux/map-s390x

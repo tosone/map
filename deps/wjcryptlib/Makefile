@@ -3,8 +3,10 @@ CFLAGS = -Os -Wall
 sources = $(wildcard *.c)
 objects = $(sources:.c=.o)
 
-# 四种算法合成单个 wjcryptlib.o，保持 deps/<name>/<name>.o 的约定。
-# -nostdlib：clang 在 -r 时仍会带上 libSystem，ld 会为此输出 dylib 警告。
+# Merge the four algorithms into a single wjcryptlib.o to keep the
+# deps/<name>/<name>.o convention used by the main Makefile.
+# -nostdlib: clang still pulls in libSystem when linking with -r, which makes
+# ld print a dylib warning.
 wjcryptlib.o: $(objects)
 	$(CC) -nostdlib -r -o $@ $(objects)
 

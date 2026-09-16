@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: C CI
 
 on:
   push:
@@ -8,9 +8,33 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v2
-      - name: make
-        run: make deps && make all
+      - uses: actions/checkout@v4
+      - uses: https://codeberg.org/mlugg/setup-zig@v2
+        with:
+          version: 0.16.0
+
+      # build once with the host compiler to also cover the glibc + gcc path
+      - name: Build with the host compiler
+        run: make deps all
+
+      # then cross compile the static musl binaries used for releases;
+      # make clean is required, otherwise the .o files written by the host
+      # compiler above would be reused
+      - name: Cross compile static musl binaries with zig
+        run: |
+          make clean
+          ARCH=amd64 CC="zig cc -target x86_64-linux-musl -Os" make deps all
+
+      # the static binary runs as is, so verify hash and base64 against the system tools
+      - name: Smoke test the static binary
+        run: |
+          file map-amd64
+          expected_sha256=$(sha256sum README.md | cut -d' ' -f1)
+          expected_base64=$(base64 -w0 README.md)
+          output=$(printf 'hash sha256 README.md\nbase64 enc README.md\nexit\n' | ./map-amd64)
+          echo "$output"
+          grep -qF "$expected_sha256" <<<"$output"
+          grep -qF "$expected_base64" <<<"$output"

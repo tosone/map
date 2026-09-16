@@ -3,19 +3,24 @@
 
 #include <command.h>
 
+/* copy argument number index into the command array, growing it as needed */
+static void commands_append(commands_t *commands, int index, const char *token) {
+  if (index == 0) { // growing one element at a time is fine: commands come from a human and stay short
+    *commands = (char **)malloc(sizeof(char *) * (index + 1));
+  } else {
+    *commands = (char **)realloc(*commands, sizeof(char *) * (index + 1));
+  }
+  size_t size = strlen(token) + 1; // room for the string itself plus '\0'
+  (*commands)[index] = (char *)malloc(sizeof(char) * size);
+  memcpy((*commands)[index], token, size); // copy the token into the freshly allocated memory
+}
+
 commands_t commands_parse(char *cmd, int *len) {
   int index = 0;
   commands_t commands = NULL;
   char *token = strtok(cmd, " ");
   while (token != NULL) {
-    if (index == 0) { // 虽然这个地方花费的时间会比较多，但是功能是解析人敲的命令，一般不会太长，所以还 OK
-      commands = (char **)malloc(sizeof(char *) * (index + 1));
-    } else {
-      commands = (char **)realloc(commands, sizeof(char *) * (index + 1));
-    }
-    size_t size = strlen(token) + 1; // 将要声明字符串本身长度和 '\0' 的空间
-    commands[index] = (char *)malloc(sizeof(char) * size);
-    memcpy(commands[index], token, size); // 将当前得到的结果复制到新的内存空间中
+    commands_append(&commands, index, token);
     token = strtok(NULL, " ");
     index++;
   }
@@ -23,9 +28,18 @@ commands_t commands_parse(char *cmd, int *len) {
   return commands;
 }
 
+commands_t commands_from_argv(char **argv, int count, int *len) {
+  commands_t commands = NULL;
+  for (int index = 0; index < count; index++) {
+    commands_append(&commands, index, argv[index]);
+  }
+  *len = count;
+  return commands;
+}
+
 void commands_free(commands_t commands, int length) {
   for (int i = 0; i < length; i++) {
-    free(commands[i]); // 释放每个字符串的空间
+    free(commands[i]); // free every string
   }
-  free(commands); // 释放指针数组的空间
+  free(commands); // free the pointer array
 }

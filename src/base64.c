@@ -4,7 +4,7 @@
 
 static const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-/* base64 字符返回 0~63，其它返回 -1 */
+/* returns 0..63 for a base64 character, -1 for anything else */
 static int base64_value(unsigned char c) {
   if (c >= 'A' && c <= 'Z') {
     return c - 'A';
@@ -25,7 +25,7 @@ static int base64_value(unsigned char c) {
 }
 
 char *map_base64_encode(const unsigned char *data, size_t size) {
-  size_t out_size = (size + 2) / 3 * 4; /* 每 3 字节一组，凑不满的补 '=' */
+  size_t out_size = (size + 2) / 3 * 4; /* every 3 bytes become 4 characters, short groups are padded */
   char *out = (char *)malloc(out_size + 1);
   if (out == NULL) {
     return NULL;
@@ -40,10 +40,10 @@ char *map_base64_encode(const unsigned char *data, size_t size) {
     out[j++] = alphabet[data[i + 2] & 0x3f];
   }
 
-  if (i + 1 == size) { /* 剩 1 字节，补 2 个 '=' */
+  if (i + 1 == size) { /* one byte left, padded with two '=' */
     out[j++] = alphabet[data[i] >> 2];
     out[j++] = alphabet[(data[i] & 0x03) << 4];
-  } else if (i + 2 == size) { /* 剩 2 字节，补 1 个 '=' */
+  } else if (i + 2 == size) { /* two bytes left, padded with one '=' */
     out[j++] = alphabet[data[i] >> 2];
     out[j++] = alphabet[((data[i] & 0x03) << 4) | (data[i + 1] >> 4)];
     out[j++] = alphabet[(data[i + 1] & 0x0f) << 2];
@@ -81,7 +81,7 @@ unsigned char *map_base64_decode(const char *data, size_t size, size_t *out_size
     int v1 = base64_value((unsigned char)data[i + 1]);
     int v2 = last && c2 == '=' ? 0 : base64_value(c2);
     int v3 = last && c3 == '=' ? 0 : base64_value(c3);
-    /* '=' 只能出现在最后 1~2 位，且补两位时必须连着补 */
+    /* '=' may only sit in the last 1 or 2 positions, and two of them only as a pair */
     if (v0 < 0 || v1 < 0 || v2 < 0 || v3 < 0 || (c2 == '=' && c3 != '=')) {
       free(out);
       return NULL;

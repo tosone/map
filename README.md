@@ -26,4 +26,4 @@ apt-get install build-essential make
 
 - How to convert the dot file to png?
 
-  You should install graphviz first, then convert filename.dot to filename.png with `dot -Tpng filename.dot -o filename.png`。
+  You should install graphviz first, then convert filename.dot to filename.png with `dot -Tpng filename.dot -o filename.png`.

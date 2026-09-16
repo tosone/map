@@ -25,7 +25,7 @@ static size_t digest_size_of(map_hash_t algo) {
   }
 }
 
-/* 调用方已经按 digest_size_of() 校验过 hex 的长度 */
+/* the caller has already validated the hex buffer size through digest_size_of() */
 static void digest_to_hex(const uint8_t *digest, size_t size, char *hex) {
   static const char hex_table[] = "0123456789abcdef";
   for (size_t i = 0; i < size; i++) {
@@ -35,7 +35,7 @@ static void digest_to_hex(const uint8_t *digest, size_t size, char *hex) {
   hex[size * 2] = '\0';
 }
 
-/* 四种算法都是「初始化 -> 分块更新 -> 收尾」，文件按 16KB 分块读完 */
+/* all four algorithms are initialise -> update in blocks -> finalise, files are read in 16KB blocks */
 
 static int md5_file(FILE *file, char *hex) {
   Md5Context context;
@@ -105,7 +105,7 @@ static int sha512_file(FILE *file, char *hex) {
   return 0;
 }
 
-/* 内存中的数据一次算完，长度受命令行输入限制，不会超过 uint32_t */
+/* in-memory data is hashed in one call; sizes come from the command line and fit in uint32_t */
 
 static void md5_data(const unsigned char *data, size_t size, char *hex) {
   MD5_HASH digest;

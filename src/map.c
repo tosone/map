@@ -205,10 +205,12 @@ bool command_base64(commands_t commands, int commands_length) {
     instring_length = strlen(string);
   }
 
+  bool ok = true;
   if (strncasecmp(commands[1], COMMAND_BASE64_ENCODE, strlen(COMMAND_BASE64_ENCODE)) == 0) {
     char *outstring = map_base64_encode(instring, instring_length);
     if (outstring == NULL) {
       map_err(ERR_INTERNAL, "base64 encode with error");
+      ok = false;
     } else {
       if (file_exist) {
         printf("base64 file: %s\n", string);
@@ -221,6 +223,7 @@ bool command_base64(commands_t commands, int commands_length) {
     unsigned char *outstring = map_base64_decode((const char *)instring, instring_length, &outstring_length);
     if (outstring == NULL) {
       map_err(ERR_INTERNAL, "base64 decode with error");
+      ok = false;
     } else {
       if (file_exist) {
         printf("base64 file: %s\n", string);
@@ -231,14 +234,14 @@ bool command_base64(commands_t commands, int commands_length) {
     }
   } else {
     printf("%s\n", ERR_COMMAND_NOT_FOUND);
-    return MAP_COMMANDS_OK;
+    ok = false;
   }
 
   if (file_exist) {
     free(instring);
   }
 
-  return MAP_COMMANDS_OK;
+  return ok ? MAP_COMMANDS_OK : MAP_COMMANDS_ERROR;
 }
 
 bool command_hash(commands_t commands, int commands_length) {
@@ -257,7 +260,7 @@ bool command_hash(commands_t commands, int commands_length) {
   }
   if (algo == MAP_HASH_INVALID) {
     printf("%s\n", ERR_COMMAND_NOT_FOUND);
-    return MAP_COMMANDS_OK;
+    return MAP_COMMANDS_ERROR;
   }
 
   char hex[MAP_HASH_HEX_SIZE];
@@ -265,18 +268,17 @@ bool command_hash(commands_t commands, int commands_length) {
   if (stat(string, &file_handler) == 0) {
     if (map_hash_file(algo, string, hex, sizeof(hex)) != 0) {
       map_err(ERR_INTERNAL, "hash file with error");
-    } else {
-      printf("hash file: %s\n", string);
-      printf("%s\n", hex);
+      return MAP_COMMANDS_ERROR;
     }
+    printf("hash file: %s\n", string);
   } else {
     if (map_hash_data(algo, (const unsigned char *)string, strlen(string), hex, sizeof(hex)) != 0) {
       map_err(ERR_INTERNAL, "hash string with error");
-    } else {
-      printf("hash string: %s\n", string);
-      printf("%s\n", hex);
+      return MAP_COMMANDS_ERROR;
     }
+    printf("hash string: %s\n", string);
   }
+  printf("%s\n", hex);
   return MAP_COMMANDS_OK;
 }
 

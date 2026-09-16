@@ -2,7 +2,7 @@
 
 #include <stddef.h>
 
-/* 算法标识，值和顺序只在本文件与 hash.c 之间约定 */
+/* algorithm ids, the values are agreed between this header and hash.c */
 typedef enum {
   MAP_HASH_INVALID = -1,
   MAP_HASH_MD5 = 0,
@@ -11,12 +11,13 @@ typedef enum {
   MAP_HASH_SHA512,
 } map_hash_t;
 
-/* 最长摘要（sha512 64 字节）的十六进制长度加上结尾 '\0' */
+/* hex length of the longest digest (sha512, 64 bytes) plus the trailing '\0' */
 #define MAP_HASH_HEX_SIZE (64 * 2 + 1)
 
 /*
- * 计算文件或内存中数据的摘要，实现基于 deps/wjcryptlib（public domain）。
- * 成功返回 0 并把小写十六进制摘要写入 hex；失败返回 -1。
+ * Compute the digest of a file or of an in-memory buffer, backed by
+ * deps/wjcryptlib (public domain).
+ * Returns 0 and writes the lowercase hex digest into hex, or -1 on failure.
  */
 int map_hash_file(map_hash_t algo, const char *path, char *hex, size_t hex_size);
 int map_hash_data(map_hash_t algo, const unsigned char *data, size_t size, char *hex, size_t hex_size);

@@ -1,7 +1,7 @@
 BasedOnStyle: LLVM
 AccessModifierOffset: -2
 AlignAfterOpenBracket: true
-AlignConsecutiveAssignments: false # 等号对齐
+AlignConsecutiveAssignments: false # align consecutive assignments
 AlignEscapedNewlinesLeft: false
 AlignOperands: true
 AlignTrailingComments: true

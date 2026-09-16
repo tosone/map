@@ -1,6 +1,8 @@
 SHELL      := /bin/bash
 
 TARGET     = map
+# version defaults to the current git tag, falls back to unknown without git or tags (override with VERSION=...)
+VERSION    ?= $(shell git describe --tags --abbrev=0 2>/dev/null || echo unknown)
 objects    = $(patsubst %.c, %.o, $(wildcard src/*.c))
 dependency = linenoise mongoose kilo uptime uuid4 wjcryptlib
 
@@ -8,7 +10,7 @@ ifeq ($(PREFIX),)
   PREFIX  := /usr/local
 endif
 
-CFLAGS  += -Os -Wall $(foreach dep, $(dependency), -I./deps/$(dep)) -I./include
+CFLAGS  += -Os -Wall $(foreach dep, $(dependency), -I./deps/$(dep)) -I./include -DVERSION=\"$(VERSION)\"
 LDFLAGS += $(foreach dep, $(dependency), ./deps/$(dep)/$(dep).o) -lm -pthread
 
 STRIP   := $(CROSS_COMPILE)strip
@@ -35,7 +37,7 @@ deps: $(dependency)
 
 .PHONY: $(dependency)
 $(dependency):
-	@cd deps/$@ && CC=$(CC) $(MAKE) -j8
+	@cd deps/$@ && $(MAKE) CC="$(CC)" -j8
 
 .PHONY: clean-deps
 clean-deps:

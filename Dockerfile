@@ -1,18 +1,18 @@
-# 使用 zig 自带 musl 交叉编译，构建 2 个架构的静态 musl 二进制
+# Cross compile static musl binaries for 2 architectures using zig's bundled musl
 #
-# 架构对照（zig 目标名）：
+# architecture mapping (zig target names):
 #   amd64   -> x86_64-linux-musl
 #   arm64v8 -> aarch64-linux-musl
 #
-# 注意：本 Docker 的 RUN 原样传给 /bin/sh（不做 $$ 转义），
-#       所以这里直接用 $VAR / $(...)，不要写成 $$。
+# Note: RUN lines are handed to /bin/sh as is (no $$ escaping), so use
+#       $VAR / $(...) directly and never write $$.
 FROM debian:trixie-slim
 
 ENV ZIG_VERSION=0.16.0
 
-# 工具依赖：
-#   binutils-multiarch —— 默认 binutils 的 strip 只认宿主附近架构，
-#                         需要 multiarch 版才能 strip 任意架构的 ELF
+# Tool dependencies:
+#   binutils-multiarch - the default binutils strip only understands the host
+#                        architecture, the multiarch build strips any ELF
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
@@ -41,9 +41,10 @@ RUN set -eux; \
 WORKDIR /map
 COPY . .
 
-# 为每个架构生成 CC 包装脚本。
-# 项目 Makefile 的 deps 规则里是 `CC=$(CC) $(MAKE)`，要求 CC 是单条命令，
-# 因此不能直接用 "zig cc -target ..."（含空格），用 wrapper 脚本最稳。
+# Generate a CC wrapper per architecture.
+# The Makefile hands CC down to every dep as `$(MAKE) CC="$(CC)"` and the dep
+# makefiles use it as a single command, so a wrapper keeps a multi-word
+# toolchain such as "zig cc -target ..." simple to pass around.
 RUN set -eux; \
     for spec in \
         "amd64 x86_64-linux-musl" \
