@@ -357,7 +357,7 @@ void signal_callback_handler(int signum) {
 
 int game2048(int argc, char *argv[]) {
   uint8_t board[SIZE][SIZE];
-  char c;
+  int c;
   bool success;
 
   if (argc == 2 && strcmp(argv[1], "test") == 0) {
@@ -379,7 +379,7 @@ int game2048(int argc, char *argv[]) {
   setBufferedInput(false);
   while (true) {
     c = getchar();
-    if (c == -1) {
+    if (c == EOF) {
       puts("\nError! Cannot read keyboard input!");
       break;
     }
