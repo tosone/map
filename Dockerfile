@@ -56,10 +56,14 @@ RUN set -eux; \
         chmod +x "/usr/local/bin/cc-$name"; \
     done
 
+# The build context has no .git (see .dockerignore), so a tag cannot be read
+# inside the image: the caller passes the version in instead.
+ARG VERSION=unknown
+
 RUN set -eux; \
     for a in amd64 arm64v8; do \
         make clean; \
-        ARCH="$a" CC="cc-$a" make deps all STRIP=/usr/bin/strip; \
+        ARCH="$a" CC="cc-$a" make deps all STRIP=/usr/bin/strip VERSION="$VERSION"; \
         mv "map-$a" /usr/local/bin; \
     done; \
     cd /usr/local/bin && file map-*
