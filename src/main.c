@@ -76,8 +76,6 @@ int main(int argc, char **argv) {
           COMMANDS_CHECK(!command_pi(commands, commands_length));
         } else if (strncasecmp(commands[0], COMMAND_UUID, strlen(COMMAND_UUID)) == 0) {
           COMMANDS_CHECK(!command_uuid(commands, commands_length));
-        } else if (strncasecmp(commands[0], COMMAND_GZIP, strlen(COMMAND_GZIP)) == 0) {
-          COMMANDS_CHECK(!command_gzip(commands, commands_length));
         } else if (strncasecmp(commands[0], COMMAND_GENPASSWD, strlen(COMMAND_GENPASSWD)) == 0) {
           COMMANDS_CHECK(!command_genpasswd(commands, commands_length));
         } else {

@@ -33,8 +33,4 @@
 
 #define COMMAND_UUID "uuid"
 
-#define COMMAND_GZIP "gzip"
-#define COMMAND_GZIP_DEC "dec"
-#define COMMAND_GZIP_ENC "enc"
-
 #define COMMAND_GENPASSWD "genpasswd"

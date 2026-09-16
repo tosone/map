@@ -2,15 +2,15 @@ SHELL     := /bin/bash
 
 TARGET     = map
 objects    = $(patsubst %.c, %.o, $(wildcard src/*.c))
-dependency = linenoise mbedtls mongoose kilo uptime uuid4 zlib
+dependency = linenoise mbedtls mongoose kilo uptime uuid4
 
 ifeq ($(PREFIX),)
   PREFIX  := /usr/local
 endif
 
 CFLAGS  += -Os -Wall $(foreach dep, $(dependency), $(if $(findstring $(dep), mbedtls), -I./deps/$(dep)/include, -I./deps/$(dep))) -I./include
-LDFLAGS += $(foreach dep, $(dependency), $(if $(findstring $(dep), mbedtls zlib), , ./deps/$(dep)/$(dep).o)) \
-	-L./deps/mbedtls/library -lmbedtls -lmbedcrypto -L./deps/zlib -lz -lm -pthread
+LDFLAGS += $(foreach dep, $(dependency), $(if $(findstring $(dep), mbedtls), , ./deps/$(dep)/$(dep).o)) \
+	-L./deps/mbedtls/library -lmbedtls -lmbedcrypto -lm -pthread
 
 STRIP   := $(CROSS_COMPILE)strip
 
@@ -38,8 +38,6 @@ deps: $(dependency) mbedtls
 $(dependency):
 	@if [[ $@ == mbedtls ]]; then                            \
 		cd deps/$@ && CC=$(CC) $(MAKE) -j8 lib;            \
-	elif [[ $@ == zlib ]]; then                              \
-		cd deps/$@ && CC=$(CC) ./configure --static && CC=$(CC) make;   \
 	else                                                     \
 		cd deps/$@ && CC=$(CC) $(MAKE) -j8;                    \
 	fi

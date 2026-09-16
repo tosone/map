@@ -24,7 +24,6 @@
 
 #include <2048.h>
 #include <command.h>
-#include <compress.h>
 #include <genpasswd.h>
 #include <pi.h>
 #include <tcp.h>
@@ -61,5 +60,4 @@ bool command_hostname(commands_t commands, int commands_length);
 bool command_game(commands_t commands, int commands_length);
 bool command_pi(commands_t commands, int commands_length);
 bool command_uuid(commands_t commands, int commands_length);
-bool command_gzip(commands_t commands, int commands_length);
 bool command_genpasswd(commands_t commands, int commands_length);

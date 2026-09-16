@@ -321,47 +321,6 @@ bool command_genpasswd(commands_t commands, int commands_length) {
   return MAP_COMMANDS_OK;
 }
 
-bool command_gzip(commands_t commands, int commands_length) {
-  command_length_check(!=, 4);
-
-  char *in = commands[2];
-  char *out = commands[3];
-  if (strncasecmp(commands[1], COMMAND_GZIP_ENC, strlen(COMMAND_GZIP_ENC)) == 0) {
-    FILE *f = NULL;
-    struct stat file_handler;
-    if (stat(in, &file_handler) == 0) {
-      f = fopen(in, "rb");
-      FILE *dest = fopen(out, "w+");
-      if (def(f, dest) != 0) {
-        fclose(f);
-        fclose(dest);
-        return MAP_COMMANDS_ERROR;
-      }
-      fclose(f);
-      fclose(dest);
-    } else {
-      return MAP_COMMANDS_OK;
-    }
-  } else if (strncasecmp(commands[1], COMMAND_GZIP_DEC, strlen(COMMAND_GZIP_DEC)) == 0) {
-    FILE *f = NULL;
-    struct stat file_handler;
-    if (stat(in, &file_handler) == 0) {
-      f = fopen(in, "rb");
-      FILE *dest = fopen(out, "w+");
-      if (inf(f, dest) != 0) {
-        fclose(f);
-        fclose(dest);
-        return MAP_COMMANDS_ERROR;
-      }
-      fclose(f);
-      fclose(dest);
-    } else {
-      return MAP_COMMANDS_OK;
-    }
-  }
-  return MAP_COMMANDS_OK;
-}
-
 void completion(const char *buf, linenoiseCompletions *lc) {
   if (buf[0] == 'b') {
     linenoiseAddCompletion(lc, "base64");
@@ -404,10 +363,6 @@ bool command_help(commands_t commands, int commands_length) {
   printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_HASH);
   printf(" <method> <string/filename>\n");
   printf(ANSI_CODE_YELLOW "\thash string/file, support methods: md5 sha1 sha256 sha512" ANSI_CODE_RESET "\n\n");
-
-  printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_GZIP);
-  printf(" <enc/dec> <filename> <filename>\n");
-  printf(ANSI_CODE_YELLOW "\tgzip compress or decompress file" ANSI_CODE_RESET "\n\n");
 
   printf(ANSI_CODE_GREEN "%s" ANSI_CODE_RESET, COMMAND_VI);
   printf(" <filename>\n");
