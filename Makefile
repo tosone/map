@@ -13,7 +13,7 @@ ifeq ($(PREFIX),)
 endif
 
 CFLAGS   += -Os -Wall $(foreach dep, $(dependency), -I./deps/$(dep)) -I./include
-CXXFLAGS += $(CFLAGS) -std=c++17
+CXXFLAGS += $(CFLAGS) -std=c++11
 LDFLAGS  += $(foreach dep, $(dependency), ./deps/$(dep)/$(dep).o) -lm -pthread
 
 STRIP   := $(CROSS_COMPILE)strip
