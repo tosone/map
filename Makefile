@@ -1,20 +1,15 @@
 SHELL      := /bin/bash
 
 TARGET     = map
-cobjects   = $(patsubst %.c, %.o, $(wildcard src/*.c))
-cxxobjects = $(patsubst %.cpp, %.o, $(wildcard src/*.cpp))
-objects    = $(cobjects) $(cxxobjects)
-dependency = linenoise mongoose kilo uptime uuid4
-
-CXX       ?= c++
+objects    = $(patsubst %.c, %.o, $(wildcard src/*.c))
+dependency = linenoise mongoose kilo uptime uuid4 wjcryptlib
 
 ifeq ($(PREFIX),)
   PREFIX  := /usr/local
 endif
 
-CFLAGS   += -Os -Wall $(foreach dep, $(dependency), -I./deps/$(dep)) -I./include
-CXXFLAGS += $(CFLAGS) -std=c++11
-LDFLAGS  += $(foreach dep, $(dependency), ./deps/$(dep)/$(dep).o) -lm -pthread
+CFLAGS  += -Os -Wall $(foreach dep, $(dependency), -I./deps/$(dep)) -I./include
+LDFLAGS += $(foreach dep, $(dependency), ./deps/$(dep)/$(dep).o) -lm -pthread
 
 STRIP   := $(CROSS_COMPILE)strip
 
@@ -30,7 +25,7 @@ all: $(TARGET)
 
 .PHONY: $(TARGET)
 $(TARGET): $(objects)
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 ifneq ($(shell uname),Darwin)
 	$(STRIP) --strip-all --remove-section=.comment $@
 endif

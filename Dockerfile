@@ -41,10 +41,9 @@ RUN set -eux; \
 WORKDIR /map
 COPY . .
 
-# 为每个架构生成 CC / CXX 包装脚本。
+# 为每个架构生成 CC 包装脚本。
 # 项目 Makefile 的 deps 规则里是 `CC=$(CC) $(MAKE)`，要求 CC 是单条命令，
 # 因此不能直接用 "zig cc -target ..."（含空格），用 wrapper 脚本最稳。
-# hash 用的 hashlib 是 C++ 库，链接需要 libc++，所以 CXX 用 `zig c++`。
 RUN set -eux; \
     for spec in \
         "amd64 x86_64-linux-musl" \
@@ -53,14 +52,13 @@ RUN set -eux; \
         name="${spec%% *}"; \
         target="${spec##* }"; \
         printf '#!/bin/sh\nexec zig cc -target %s -Os "$@"\n' "$target" > "/usr/local/bin/cc-$name"; \
-        printf '#!/bin/sh\nexec zig c++ -target %s -Os "$@"\n' "$target" > "/usr/local/bin/cxx-$name"; \
-        chmod +x "/usr/local/bin/cc-$name" "/usr/local/bin/cxx-$name"; \
+        chmod +x "/usr/local/bin/cc-$name"; \
     done
 
 RUN set -eux; \
     for a in amd64 arm64v8; do \
         make clean; \
-        ARCH="$a" CC="cc-$a" CXX="cxx-$a" make deps all STRIP=/usr/bin/strip; \
+        ARCH="$a" CC="cc-$a" make deps all STRIP=/usr/bin/strip; \
         mv "map-$a" /usr/local/bin; \
     done; \
     cd /usr/local/bin && file map-*
