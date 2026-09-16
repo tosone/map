@@ -14,8 +14,6 @@
 
 #include <kilo.h>
 #include <linenoise.h>
-#include <mbedtls/base64.h>
-#include <mbedtls/md.h>
 #include <mongoose.h>
 #include <uptime.h>
 #include <uuid4.h>
@@ -23,8 +21,10 @@
 #include <cmddefine.h>
 
 #include <2048.h>
+#include <base64.h>
 #include <command.h>
 #include <genpasswd.h>
+#include <hash.h>
 #include <pi.h>
 #include <tcp.h>
 
@@ -46,7 +46,6 @@
 void clear();
 void algorithm_init();
 
-void print_hex(const uint8_t *b, size_t len);
 void completion(const char *buf, linenoiseCompletions *lc);
 bool command_hash(commands_t commands, int commands_length);
 bool command_base64(commands_t commands, int commands_length);

@@ -1,16 +1,20 @@
-SHELL     := /bin/bash
+SHELL      := /bin/bash
 
 TARGET     = map
-objects    = $(patsubst %.c, %.o, $(wildcard src/*.c))
-dependency = linenoise mbedtls mongoose kilo uptime uuid4
+cobjects   = $(patsubst %.c, %.o, $(wildcard src/*.c))
+cxxobjects = $(patsubst %.cpp, %.o, $(wildcard src/*.cpp))
+objects    = $(cobjects) $(cxxobjects)
+dependency = linenoise mongoose kilo uptime uuid4
+
+CXX       ?= c++
 
 ifeq ($(PREFIX),)
   PREFIX  := /usr/local
 endif
 
-CFLAGS  += -Os -Wall $(foreach dep, $(dependency), $(if $(findstring $(dep), mbedtls), -I./deps/$(dep)/include, -I./deps/$(dep))) -I./include
-LDFLAGS += $(foreach dep, $(dependency), $(if $(findstring $(dep), mbedtls), , ./deps/$(dep)/$(dep).o)) \
-	-L./deps/mbedtls/library -lmbedtls -lmbedcrypto -lm -pthread
+CFLAGS   += -Os -Wall $(foreach dep, $(dependency), -I./deps/$(dep)) -I./include
+CXXFLAGS += $(CFLAGS) -std=c++17
+LDFLAGS  += $(foreach dep, $(dependency), ./deps/$(dep)/$(dep).o) -lm -pthread
 
 STRIP   := $(CROSS_COMPILE)strip
 
@@ -26,21 +30,17 @@ all: $(TARGET)
 
 .PHONY: $(TARGET)
 $(TARGET): $(objects)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 ifneq ($(shell uname),Darwin)
 	$(STRIP) --strip-all --remove-section=.comment $@
 endif
 
 .PHONY: deps
-deps: $(dependency) mbedtls
+deps: $(dependency)
 
 .PHONY: $(dependency)
 $(dependency):
-	@if [[ $@ == mbedtls ]]; then                            \
-		cd deps/$@ && CC=$(CC) $(MAKE) -j8 lib;            \
-	else                                                     \
-		cd deps/$@ && CC=$(CC) $(MAKE) -j8;                    \
-	fi
+	@cd deps/$@ && CC=$(CC) $(MAKE) -j8
 
 .PHONY: clean-deps
 clean-deps:

@@ -179,69 +179,56 @@ bool command_base64(commands_t commands, int commands_length) {
   command_length_check(!=, 3);
 
   char *string = commands[2];
-  char *instring = NULL;
+  unsigned char *instring = NULL;
   size_t instring_length = 0;
 
   bool file_exist = false;
 
-  FILE *f = NULL;
-
   struct stat file_handler;
   if (stat(string, &file_handler) == 0) {
     file_exist = true;
-    f = fopen(string, "rb");
+    FILE *f = fopen(string, "rb");
+    if (f == NULL) {
+      map_err(ERR_INTERNAL, "base64 open file with error");
+      return MAP_COMMANDS_OK;
+    }
     unsigned char buf[1024];
     size_t n;
     while ((n = fread(buf, 1, sizeof(buf), f)) > 0) {
-      if (instring_length == 0) {
-        instring = (char *)malloc(n * sizeof(char));
-        instring_length += n;
-        memcpy(instring, buf, n);
-      } else {
-        instring = (char *)realloc(instring, (n + instring_length) * sizeof(char));
-        memcpy(instring + instring_length, buf, n);
-        instring_length += n;
-      }
+      instring = (unsigned char *)realloc(instring, instring_length + n);
+      memcpy(instring + instring_length, buf, n);
+      instring_length += n;
     }
     fclose(f);
-  }
-
-  if (!file_exist) {
-    instring = string;
+  } else {
+    instring = (unsigned char *)string;
+    instring_length = strlen(string);
   }
 
   if (strncasecmp(commands[1], COMMAND_BASE64_ENCODE, strlen(COMMAND_BASE64_ENCODE)) == 0) {
-    size_t olen = 0;
-    mbedtls_base64_encode(NULL, 0, &olen, (unsigned char *)instring, strlen(instring));
-    char *outstring = (char *)calloc(olen, sizeof(char));
-    if (mbedtls_base64_encode((unsigned char *)outstring, olen, &olen, (unsigned char *)instring, strlen(instring)) != 0) {
+    char *outstring = map_base64_encode(instring, instring_length);
+    if (outstring == NULL) {
       map_err(ERR_INTERNAL, "base64 encode with error");
     } else {
       if (file_exist) {
         printf("base64 file: %s\n", string);
       }
-      // else {
-      //   printf("base64 string: %s\n", string);
-      // }
       printf("%s\n", outstring);
+      free(outstring);
     }
-    free(outstring);
   } else if (strncasecmp(commands[1], COMMAND_BASE64_DECODE, strlen(COMMAND_BASE64_DECODE)) == 0) {
-    size_t olen = 0;
-    mbedtls_base64_decode(NULL, 0, &olen, (unsigned char *)instring, strlen(instring));
-    char *outstring = (char *)calloc(olen, sizeof(char));
-    if (mbedtls_base64_decode((unsigned char *)outstring, olen, &olen, (unsigned char *)instring, strlen(instring)) != 0) {
-      map_err(ERR_INTERNAL, "base64 encode with error");
+    size_t outstring_length = 0;
+    unsigned char *outstring = map_base64_decode((const char *)instring, instring_length, &outstring_length);
+    if (outstring == NULL) {
+      map_err(ERR_INTERNAL, "base64 decode with error");
     } else {
       if (file_exist) {
         printf("base64 file: %s\n", string);
       }
-      // else {
-      //   printf("base64 string: %s\n", string);
-      // }
-      printf("%s\n", outstring);
+      fwrite(outstring, 1, outstring_length, stdout);
+      printf("\n");
+      free(outstring);
     }
-    free(outstring);
   } else {
     printf("%s\n", ERR_COMMAND_NOT_FOUND);
     return MAP_COMMANDS_OK;
@@ -254,48 +241,42 @@ bool command_base64(commands_t commands, int commands_length) {
   return MAP_COMMANDS_OK;
 }
 
-void print_hex(const uint8_t *b, size_t len) {
-  const uint8_t *end = b + len;
-  while (b < end) {
-    printf("%02x", (uint8_t)*b++);
-  }
-  printf("\n");
-}
-
 bool command_hash(commands_t commands, int commands_length) {
   command_length_check(!=, 3);
   char *hash_name = commands[1];
   char *string = commands[2];
-  const mbedtls_md_info_t *md_info = NULL;
+  map_hash_t algo = MAP_HASH_INVALID;
   if (strncasecmp(hash_name, COMMAND_HASH_MD5, strlen(COMMAND_HASH_MD5)) == 0) {
-    md_info = mbedtls_md_info_from_type(MBEDTLS_MD_MD5);
+    algo = MAP_HASH_MD5;
   } else if (strncasecmp(hash_name, COMMAND_HASH_SHA1, strlen(COMMAND_HASH_SHA1)) == 0) {
-    md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA1);
+    algo = MAP_HASH_SHA1;
   } else if (strncasecmp(hash_name, COMMAND_HASH_SHA256, strlen(COMMAND_HASH_SHA256)) == 0) {
-    md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+    algo = MAP_HASH_SHA256;
   } else if (strncasecmp(hash_name, COMMAND_HASH_SHA512, strlen(COMMAND_HASH_SHA512)) == 0) {
-    md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA512);
+    algo = MAP_HASH_SHA512;
   }
-  int hash_size = (size_t)mbedtls_md_get_size(md_info);
-  unsigned char *outbyte = (unsigned char *)calloc(hash_size, sizeof(unsigned char));
+  if (algo == MAP_HASH_INVALID) {
+    printf("%s\n", ERR_COMMAND_NOT_FOUND);
+    return MAP_COMMANDS_OK;
+  }
 
+  char hex[MAP_HASH_HEX_SIZE];
   struct stat file_handler;
   if (stat(string, &file_handler) == 0) {
-    if (mbedtls_md_file(md_info, string, outbyte) != 0) {
+    if (map_hash_file(algo, string, hex, sizeof(hex)) != 0) {
       map_err(ERR_INTERNAL, "hash file with error");
     } else {
       printf("hash file: %s\n", string);
-      print_hex((uint8_t *)outbyte, hash_size);
+      printf("%s\n", hex);
     }
   } else {
-    if (mbedtls_md(md_info, (unsigned char *)string, strlen(string), outbyte) != 0) {
+    if (map_hash_data(algo, (const unsigned char *)string, strlen(string), hex, sizeof(hex)) != 0) {
       map_err(ERR_INTERNAL, "hash string with error");
     } else {
       printf("hash string: %s\n", string);
-      print_hex((uint8_t *)outbyte, hash_size);
+      printf("%s\n", hex);
     }
   }
-  free(outbyte);
   return MAP_COMMANDS_OK;
 }
 
