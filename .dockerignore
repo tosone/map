@@ -1,0 +1,12 @@
+.git
+.DS_Store
+
+# 构建产物（避免把宿主机不同平台的 *.o 带入镜像，否则 make 会误判"已最新"）
+musl/
+*.o
+*.a
+*.so
+*.dylib
+*.out
+map
+map-*
